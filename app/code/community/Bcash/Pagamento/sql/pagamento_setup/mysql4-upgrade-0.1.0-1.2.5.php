@@ -63,5 +63,5 @@ try {
     $installer->endSetup();
 
 } catch (Exception $e) {
-    Mage::log("Exception - app/code/community/Bcash/Pagamento/sql/pagamento_setup/mysql4-upgrade-0.1.0-1.2.2.php: " . $e->getMessage());
+    Mage::log("Exception - app/code/community/Bcash/Pagamento/sql/pagamento_setup/mysql4-upgrade-*.php: " . $e->getMessage());
 }

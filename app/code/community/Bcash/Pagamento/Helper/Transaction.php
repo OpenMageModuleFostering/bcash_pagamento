@@ -53,6 +53,10 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
     /**
      * @var
      */
+    private $quoteAllVisibleItems;
+    /**
+     * @var
+     */
     private $billingDataBcash;
     /**
      * @var
@@ -139,7 +143,8 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
         //$shippingHandling = floatval($this->grandTotalBcash -$this->subTotalBcash);
         $this->billingDataBcash = $this->quoteBcash->getBillingAddress()->getData();
         $this->quoteIdTransaction = (str_pad($quoteId, 9, 0, STR_PAD_LEFT));
-        $this->itemsBcash = $this->quoteBcash->getItemsCollection()->getItems();
+        //$this->itemsBcash = $this->quoteBcash->getItemsCollection()->getItems();
+        $this->quoteAllVisibleItems = $this->loadAllVisibleItemsOnCart($this->quoteBcash);
         $this->cards = array(PaymentMethodEnum::VISA, PaymentMethodEnum::MASTERCARD, PaymentMethodEnum::AMERICAN_EXPRESS, PaymentMethodEnum::AURA, PaymentMethodEnum::DINERS, PaymentMethodEnum::HIPERCARD, PaymentMethodEnum::ELO);
         $this->boleto = PaymentMethodEnum::BANK_SLIP;
         $this->tefs = array(PaymentMethodEnum::BB_ONLINE_TRANSFER, PaymentMethodEnum::BRADESCO_ONLINE_TRANSFER, PaymentMethodEnum::ITAU_ONLINE_TRANSFER, PaymentMethodEnum::BANRISUL_ONLINE_TRANSFER, PaymentMethodEnum::HSBC_ONLINE_TRANSFER);
@@ -154,14 +159,15 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
      */
     public function startTransaction()
     {
-        $this->transactionRequest = $this->createTransactionRequestBcash();
-        $this->setShippingBcash();
-        $this->setPaymentMethodBcash();
-        $payment = new Payment($this->consumer_key);
-        if ($this->sandbox) {
-            $payment->enableSandBox(true);
-        }
         try {
+            $this->transactionRequest = $this->createTransactionRequestBcash();
+            $this->setShippingBcash();
+            $this->setPaymentMethodBcash();
+            $payment = new Payment($this->consumer_key);
+            if ($this->sandbox) {
+                $payment->enableSandBox(true);
+            }
+
             $response = $payment->create($this->transactionRequest);
 
             $arRet = array(
@@ -199,6 +205,9 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
                 $messages .= "\n- " . urldecode($err->description) . " (" . $err->code . ")";
             }
             Mage::throwException($messages);
+        } catch (Exception $e) {
+            Mage::helper("bcash")->saveLog($e->getMessage());
+            Mage::throwException($e->getMessage());
         }
     }
 
@@ -347,7 +356,7 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
     public function createProductBcash()
     {
         $products = array();
-        foreach ($this->itemsBcash as $item) {
+        foreach ($this->quoteAllVisibleItems as $item) {
             $price = $item->getPrice();
             if ($price > 0) {
                 $product = new Product();
@@ -357,9 +366,10 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
                 $product->setDescription($name);
                 $qty = $item->getQty();
                 $product->setAmount(intval($qty));
-                $product->setValue(floatval($price));
+                $product->setValue(floatval(number_format($price, 2, '.', '')));
                 array_push($products, $product);
             }
+
         }
         return $products;
     }
@@ -490,5 +500,20 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
             }
         }
         return $state;
+    }
+
+    /**
+     * Retorna todos os itens que não estão marcados como apagado e não tem pai
+     * (ou seja, retornará itens de produtos do tipo bundled e configurable, mas não os produtos associados a eles).
+     * Cada item do array corresponde a uma linha exibida na página do carrinho.
+     *
+     * @param $quote
+     * @return mixed
+     */
+    private function loadAllVisibleItemsOnCart($quote)
+    {
+        $items = $quote->getAllVisibleItems();
+
+        return $items;
     }
 }

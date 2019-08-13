@@ -90,7 +90,8 @@ class Bcash_Pagamento_Model_Observer
             $block->setType($type);
             $layout->getBlock('content')->append($block);
 
-            Mage::helper("bcash")->saveLog("Pedido realizado com sucesso.");
+            $bcashTransacation = $order->getTransactionIdBcash();
+            Mage::helper("bcash")->saveLog("Pedido '" . $lastOrderId . "' realizado com sucesso. Transacao: " . $bcashTransacation);
         } catch (Exception $e) {
             Mage::helper("bcash")->saveLog($e->getMessage());
         }

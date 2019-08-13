@@ -3,19 +3,19 @@
     <modules>
 
         <Bcash_Pagamento>
-            <version>1.2.2</version>
+            <version>1.2.5</version>
         </Bcash_Pagamento>
 
         <Bcash_Creditcard>
-            <version>1.2.2</version>
+            <version>1.2.5</version>
         </Bcash_Creditcard>
 
         <Bcash_Bankslip>
-            <version>1.2.2</version>
+            <version>1.2.5</version>
         </Bcash_Bankslip>
 
         <Bcash_Onlinetransfer>
-            <version>1.2.2</version>
+            <version>1.2.5</version>
         </Bcash_Onlinetransfer>
 
     </modules>
