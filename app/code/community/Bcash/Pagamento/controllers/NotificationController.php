@@ -44,7 +44,7 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
             $statusId = (int)Mage::app()->getRequest()->getParam('statusId');
 
             // Notification Simulator
-            $urlSubmit = Mage::getUrl('pagamento/notification/index');
+            $urlSubmit = Mage::getUrl('pagamento/notification/index',array('_secure'=>true));
             echo "<h1>Bcash Notification Simulator</h1>
               <form method='GET' action='" . $urlSubmit . "'>
                 <label>Nro. Pedido:</label>
@@ -65,7 +65,7 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
              </form>";
 
             if(!empty($transactionId) && !empty($statusId) && !empty($orderId)) {
-                $urlSimulator = Mage::getUrl('pagamento/notification/request');
+                $urlSimulator = Mage::getUrl('pagamento/notification/request',array('_secure'=>true));
                 $returnSimulator = $this->notificationSimulator($urlSimulator, $transactionId, $orderId, $statusId);
                 echo "<h2>Retorno:</h2> <div style='clear:both;'></div><pre style='background-color: #EAEAEA; padding:20px;'>";
                 var_dump($returnSimulator);
@@ -137,6 +137,9 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
     {
         // Carrega pedido a partir de código incremental
         $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+        $orderId = $order->getId();
+        $quoteId = $order->getQuoteId();
+
         switch ($statusId) {
             case NotificationStatusEnum::APPROVED:
             case NotificationStatusEnum::COMPLETED:
@@ -150,7 +153,6 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
                     $order->save();
 
                     // Atualiza status na transação
-                    $quoteId = $order->getQuoteId();
                     $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
                     $quote->setStatusBcash($statusId)
                           ->setDescriptionStatusBcash("Aprovada");
@@ -162,6 +164,12 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
                     $payment->setIsTransactionClosed(0);
                     $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, array('Status'=>'Em andamento'));
                     $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true)->save();
+
+                    // Atualiza status na transação
+                    $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+                    $quote->setStatusBcash($statusId)
+                        ->setDescriptionStatusBcash("Em andamento");
+                    $quote->save();
                 break;
             case NotificationStatusEnum::CANCELLED:
                     $order->registerCancellation('Pagamento cancelado.', TRUE)->save();
@@ -169,7 +177,6 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
                     $order->save();
 
                     // Atualiza status na transação
-                    $quoteId = $order->getQuoteId();
                     $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
                     $quote->setStatusBcash($statusId)
                           ->setDescriptionStatusBcash("Cancelada");
@@ -183,6 +190,12 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
                         $order->setState(Mage_Sales_Model_Order::STATE_HOLDED, true);
                     }
                     $order->save();
+
+                    // Atualiza status na transação
+                    $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+                    $quote->setStatusBcash($statusId)
+                        ->setDescriptionStatusBcash("Em disputa");
+                    $quote->save();
                 break;
             case NotificationStatusEnum::CHARGEBACK:
                     $order->addStatusHistoryComment('A transação ' . $transactionId . ' está com status CHARGEBACK EM ANÁLISE. Entre em contato com o Bcash.');
@@ -192,15 +205,30 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
                         $order->setState(Mage_Sales_Model_Order::STATE_HOLDED, true);
                     }
                     $order->save();
+
+                    // Atualiza status na transação
+                    $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+                    $quote->setStatusBcash($statusId)
+                        ->setDescriptionStatusBcash("Chargeback");
+                    $quote->save();
                 break;
             case NotificationStatusEnum::REFUNDED:
                     $order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true)->save();
+
+                    // Atualiza status na transação
+                    $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+                    $quote->setStatusBcash($statusId)
+                        ->setDescriptionStatusBcash("Devolvida");
+                    $quote->save();
                 break;
             default:
                 $order->addStatusHistoryComment('Notificação da transação ' . $transactionId . ' sem ação identificada para o status ' . $statusId);
                 $order->save();
                 break;
         }
+
+        // Sinc datas
+        Mage::helper('pagamento')->updateOrderSyncBcashDataWithQuote($orderId, $quoteId);
     }
 
     /**

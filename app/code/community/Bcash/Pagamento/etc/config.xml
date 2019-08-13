@@ -169,6 +169,14 @@
                     </bcash_pagamento_observer>
                 </observers>
             </checkout_type_onepage_save_order_after>
+            <sales_quote_payment_import_data_before>
+                <observers>
+                    <bcash_pagamento_observer>
+                        <class>Bcash_Pagamento_Model_Observer</class>
+                        <method>updateSalesQuotePayment</method>
+                    </bcash_pagamento_observer>
+                </observers>
+            </sales_quote_payment_import_data_before>
         </events>
     </frontend>
     <default>

@@ -3,7 +3,7 @@
 <div id="bcash_pagamento" style="float:left; width: 100%; padding: 10px;">
 <?php
 //$this->escapeHtml($this->getOrder()->getViewOrderUrl())
-$url = Mage::getUrl() . 'sales/order/view/order_id/' . $this->getOrder()->getId();
+$url = Mage::getUrl('', array('_secure'=>true)) . 'sales/order/view/order_id/' . $this->getOrder()->getId();
 $idPedido = $this->getQuote()->getReservedOrderId();
 $type = $this->getType();
 if ($type && $type->type == Bcash_Pagamento_Helper_PaymentMethod::CARD_TYPE): ?>

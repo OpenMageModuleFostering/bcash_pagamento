@@ -124,4 +124,40 @@ class Bcash_Pagamento_PaymentController extends Mage_Core_Controller_Front_Actio
 
         $this->renderLayout();
     }
+
+    /**
+     * Retorna parcelamentos por Json
+     */
+    public function installmentsAction()
+    {
+        $method = Mage::app()->getRequest()->getPost('method');
+
+        $paymentInstallments = Mage::helper('pagamento')->getInstallments();
+        $response =  "[{ccId : 0, ccName : '', ccNumber : '', ccDescript : '(Selecione o número de parcelas)'}";
+        $okInstallments = $paymentInstallments['ok'];
+        if($okInstallments):
+            $installments = $paymentInstallments["installments"][0]->paymentTypes;
+            foreach ($installments as $type) :
+                if ($type->name == 'card') :
+                    foreach ($type->paymentMethods as $typePayment) :
+                        foreach ($typePayment->installments as $paymentInstallment) :
+                            $response .= ",{ccId : " . $typePayment->id . ", ccName : '" . $typePayment->name . "', ccNumber : " . $paymentInstallment->number . ",
+                            ccDescript : '" . $paymentInstallment->number . "x - R$ " . number_format($paymentInstallment->installmentAmount,2,',','.') .
+                                ($paymentInstallment->rate ? ' ('. number_format($paymentInstallment->rate,2,',','.') . '%)' : '') . (isset($paymentInstallment->installmentAmountDesc) ? $paymentInstallment->installmentAmountDesc : '') . "'}";
+                        endforeach;
+                    endforeach;
+                endif;
+            endforeach;
+        endif;
+        $response .= "]";
+
+        $returnResponse = array(
+            "installments" => $response,
+            "method" => $method
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode($returnResponse);
+        exit;
+    }
 }

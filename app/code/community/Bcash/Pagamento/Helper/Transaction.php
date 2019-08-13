@@ -212,7 +212,7 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
     public function createTransactionRequestBcash()
     {
         //Id:Plataforma => 565
-        $url = Mage::getUrl('pagamento/notification/request');
+        $url = Mage::getUrl('pagamento/notification/request',array('_secure'=>true));
         $transactionRequest = new TransactionRequest();
         $transactionRequest->setSellerMail($this->email);
         $transactionRequest->setOrderId($this->quoteBcash->getReservedOrderId());
@@ -223,7 +223,6 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
         $transactionRequest->setViewedContract("S");
         $transactionRequest->setDependentTransactions($this->createDependentTransactionsBcash());
         $transactionRequest->setPlatformId(565);
-        //var_dump($transactionRequest);
         return $transactionRequest;
     }
 
@@ -238,10 +237,12 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
             $this->transactionRequest->setInstallments($this->installments);
         }
 
-        if ($this->installments == 1) {
+        /*if ($this->installments == 1) {
             $discount = $this->calculateDiscount($this->payment_method);
             $this->setDiscountBcash($discount);
-        }
+        }*/
+
+        $this->setDiscountBcash();
     }
 
     /**
@@ -259,7 +260,6 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
             $percent = $this->obj->getConfigData('desconto_boleto');
         }
         if ($percent) {
-            //$discount = floatval(($this->subTotalBcash / 100) * $percent);
             $discount = floatval(number_format(($this->subTotalBcash / 100) * $percent, 2, '.', ''));
             $this->discountPercentBcash = $percent;
             $this->discountBcash = $discount;
@@ -410,6 +410,9 @@ class Bcash_Pagamento_Helper_Transaction extends Mage_Payment_Helper_Data
      */
     public function setDiscountBcash($discount)
     {
+        $discount = $this->quoteBcash->getShippingAddress()->getDiscountAmount();
+        if($discount < 0) { $discount = ((-1) * $discount); }
+        $discount = floatval(number_format($discount, 2, '.', ''));
         $this->discountBcash = $discount;
         $this->transactionRequest->setDiscount($discount);
     }

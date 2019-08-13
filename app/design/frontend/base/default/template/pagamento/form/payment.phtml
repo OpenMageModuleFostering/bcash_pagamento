@@ -49,6 +49,7 @@ $paymentGroupName = array(
         </div>
     </div>
 
+    <div id="payment-bcash-group">
     <?php foreach ($paymentMethods as $paymentType => $payments): ?>
         <?php
             $totalPayments = count($payments);
@@ -173,11 +174,12 @@ $paymentGroupName = array(
         <?php
         $size--;
     endforeach; ?>
+    </div>
 </div>
 <!-- div b-col-xs-4 -->
 <script type="text/javascript">
     //<![CDATA[
-    var requestUrl = '<?php echo Mage::getUrl('pagamento/payment/dados') ?>';
+    var requestUrl = '<?php echo Mage::getUrl('pagamento/payment/dados',array('_secure'=>true)) ?>';
 
     function in_array(needle, haystack, argStrict) {
         var key = '',
@@ -240,32 +242,46 @@ $paymentGroupName = array(
 
     var initBcashPagamento = function () {
         checkPaymentOnLoad();
+        uncheckBcashPaymentMethods();
+
+        function parseJSON(data) {
+            return (window.JSON && window.JSON.parse ? window.JSON.parse( data ) : (new Function("return " + data))());
+        }
 
         function showInstallmentsOnlyForMethod(method)
         {
+            changeInstallmentsSelect("Carregando...");
+            // Update installments before show
+            updateInstallments(method);
+        }
+
+        function showInstallmentsSelectBox(method, installmentsStr)
+        {
+            var newInstallments = eval('(' + installmentsStr + ')');
+
             if (in_array(method, cards)) {
                 var select_id = 'installments_bcash';
                 var select =  document.getElementById(select_id);
 
-                if(installments_cc.length > 1) {
+                if(newInstallments.length > 1) {
                     // Remove options
                     var i; for(i=select.options.length-1; i>=0; i--) { select.remove(i); }
 
                     // Add options
                     var option = '';
-                    for (i=0; i < installments_cc.length; i++) {
-                        if(installments_cc[i].ccId == 0) {
+                    for (i=0; i < newInstallments.length; i++) {
+                        if(newInstallments[i].ccId == 0) {
                             option = document.createElement("option");
-                            option.text = installments_cc[i].ccDescript;
+                            option.text = newInstallments[i].ccDescript;
                             option.value = '';
                             option.disabled = 'disabled';
                             select.add(option);
                             option = '';
                         }
-                        if(installments_cc[i].ccId == method) {
+                        if(newInstallments[i].ccId == method) {
                             option = document.createElement("option");
-                            option.text = installments_cc[i].ccDescript;
-                            option.value = installments_cc[i].ccNumber;
+                            option.text = newInstallments[i].ccDescript;
+                            option.value = newInstallments[i].ccNumber;
                             select.add(option);
                             option = '';
                         }
@@ -273,6 +289,19 @@ $paymentGroupName = array(
                     document.getElementById(select_id).value = "";
                 }
             }
+        }
+
+        function changeInstallmentsSelect(text) {
+            var changeSelect_id = 'installments_bcash';
+            var changeSelect =  document.getElementById(changeSelect_id);
+            // Remove installments options
+            var i; for(i=changeSelect.options.length-1; i>=0; i--) { changeSelect.remove(i); }
+            var changeOption = document.createElement("option");
+            changeOption.text = text;
+            changeOption.value = '';
+            //changeOption.disabled = 'disabled';
+            changeSelect.add(changeOption);
+            document.getElementById(changeSelect_id).value = "";
         }
 
         function ableCvv(card) {
@@ -305,16 +334,38 @@ $paymentGroupName = array(
             if (typeof(OSCPayment) !== 'undefined') {                
                 OSCPayment.forcesavePayment();
             }
+            if(typeof(checkout) !== 'undefined') {
+                if ((typeof(checkout.update) !== 'undefined') && (typeof(checkout.urls) !== 'undefined')) {
+                    checkout.update(checkout.urls.payment_method);
+                }
+            }
         }
 
         function checkPaymentOnLoad() {
+            var hasChecked = 0;
+            var isBcash = 0;
             document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
-                if(e.value == 'pagamento') {
-                    e.checked = true;
-                    //force order review reload
-                    forceReloadOrderReviewOsc();
+                if(e.checked == true) {
+                    hasChecked = 1;
+                    if(e.value == 'pagamento') {
+                        isBcash = 1;
+                        showBcashPaymentMethod();
+                    }
                 }
             });
+
+            if(hasChecked == 0 && isBcash == 0) {
+                document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
+                    if(e.value == 'pagamento') {
+                        e.checked = true;
+                        showBcashPaymentMethod();
+                    }
+                });
+            }
+
+            if(hasChecked == 1 && isBcash == 0) {
+                hideBcashPaymentMethod();
+            }
         }
 
         function checkIsCardSelected() {
@@ -440,7 +491,14 @@ $paymentGroupName = array(
             disableUnunsed(paymentRadio);
             showInstallmentsOnlyForMethod(paymentRadio.value);
             ableCvv(paymentRadio.value);
-            checkPaymentOnLoad();
+            document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
+                if(e.value == 'pagamento') {
+                    e.checked = true;
+                }
+            });
+            //force order review reload
+            forceReloadOrderReviewOsc();
+
         }
 
         function enableCardForm() {
@@ -809,6 +867,124 @@ $paymentGroupName = array(
                 return true;
             }
         }
+
+        function updateInstallments(method) {
+            new Ajax.Request('<?php echo Mage::getUrl('pagamento/payment/installments',array('_secure'=>true)) ?>', {
+                method: 'post',
+                parameters: 'method=' + method,
+                onSuccess: successGetInstallments,
+                onFailure:  failureGetInstallments
+            });
+        }
+
+        function successGetInstallments(response) {
+            var strInstallmentsResponse = response.responseJSON.installments;
+            var strMethodResponse = response.responseJSON.method;
+
+            // Update json
+            installments_cc = eval('(' + strInstallmentsResponse + ')');
+
+            showInstallmentsSelectBox(strMethodResponse, strInstallmentsResponse);
+        }
+
+        function failureGetInstallments(response){
+            alert("Falha inesperada ao atualizar parcelamentos. Por favor, selecione o meio de pagamento novamente." );
+        }
+
+        function hideBcashPaymentMethod() {
+            var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group');
+
+            // cards
+            var cardConteiner = document.getElementById('card-conteiner');
+            if(!hasClass(cardConteiner, 'b-hide')){
+                cardConteiner.className = cardConteiner.className + " b-hide";
+            }
+            disableCardForm();
+
+            // radios
+            document.body.select('input[type=radio][name="payment-method"]:checked').each(function (element) {
+                if (element.checked) {
+                    element.checked = false;
+                }
+            });
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash");
+            for (var i = paymentRadios.length - 1; i >= 0; i--) {
+                if(hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
+                    paymentRadios[i].className = paymentRadios[i].className.replace(/\bvalidate-one-required-by-name\b/, '');
+                }
+                paymentRadios[i].disabled = true;
+            }
+
+            // all
+            if(!hasClass(paymentBcashConteiner, 'b-hide')){
+                paymentBcashConteiner.className = paymentBcashConteiner.className + " b-hide";
+            }
+            if (!hasClass(paymentConteiner, 'b-hide')) {
+                paymentConteiner.className = paymentConteiner.className + " b-hide";
+            }
+        }
+
+        function uncheckBcashPaymentMethods() {
+            document.body.select('input[type=radio][name="payment-method"]:checked').each(function (element) {
+                if (element.checked) {
+                    element.checked = false;
+                }
+            });
+        }
+
+        function showBcashPaymentMethod() {
+            var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group');
+
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash");
+            for (var i = paymentRadios.length - 1; i >= 0; i--) {
+                if(!hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
+                    paymentRadios[i].className = paymentRadios[i].className + " validate-one-required-by-name";
+                }
+                paymentRadios[i].disabled = false;
+            }
+            if(hasClass(paymentBcashConteiner, 'b-hide')) {
+                paymentBcashConteiner.className = paymentBcashConteiner.className.replace(/\bb-hide\b/, '');
+            }
+            if (hasClass(paymentConteiner, 'b-hide')) {
+                paymentConteiner.className = paymentConteiner.className.replace(/\bb-hide\b/, '');
+            }
+        }
+
+        $(document).on('change', 'input[type=radio][name=payment[method]]', function (event) {
+            var target = event.target;
+            var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group');
+            if(target.id == 'p_method_pagamento') {
+                showBcashPaymentMethod();
+            } else {
+
+                hideBcashPaymentMethod();
+            }
+            event.preventDefault();
+        });
+
+        $(document).on('change', 'input[type=radio][name=shipping_method]', function (event) {
+            var target = event.target;
+            changeInstallmentsSelect("Selecione novamente o meio de pagamento.");
+            uncheckBcashPaymentMethods();
+            event.preventDefault();
+        });
+
+        $(document).on('click', '#coupon-cancel', function (event) {
+            var target = event.target;
+            changeInstallmentsSelect("Selecione novamente o meio de pagamento.");
+            uncheckBcashPaymentMethods();
+            event.preventDefault();
+        });
+
+        $(document).on('click', '#coupon-apply', function (event) {
+            var target = event.target;
+            changeInstallmentsSelect("Selecione novamente o meio de pagamento.");
+            uncheckBcashPaymentMethods();
+            event.preventDefault();
+        });
     };
     initBcashPagamento();
     //]]>
