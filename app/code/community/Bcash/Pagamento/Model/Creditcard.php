@@ -1,22 +1,23 @@
 <?php
 
-
 /**
- * Class Bcash_Pagamento_Model_PaymentMethod
+ * Class Bcash_Pagamento_Model_Creditcard
  */
-class Bcash_Pagamento_Model_PaymentMethod extends Mage_Payment_Model_Method_Abstract
+class Bcash_Pagamento_Model_Creditcard extends Mage_Payment_Model_Method_Abstract
 {
     /**
      * @var string
      */
-    protected $_code = 'pagamento';
+    protected $_code = 'bcash_creditcard';
 
     /**
      * @var string
      */
-    protected $_formBlockType = 'pagamento/form_payment';
+    protected $_formBlockType = 'bcash/form_creditcard';
+    protected $_infoBlockType = 'bcash/info_creditcard';
 
-    /** Flag executa o método initalize() com o checkout completo.
+    /**
+     * Flag executa o método initalize() com o checkout completo.
      * @var bool
      */
     protected $_isInitializeNeeded = true;
@@ -24,11 +25,9 @@ class Bcash_Pagamento_Model_PaymentMethod extends Mage_Payment_Model_Method_Abst
     protected $_isGateway = true;
     protected $_canAuthorize = true;
     protected $_canUseCheckout = true;
-    //Disable multi-shipping for this payment module.
     protected $_canUseForMultishipping  = false;
 
     protected $transaction;
-
 
     /**
      * Inicializa o método de pagamento. Chamado quando a compra é completa.
@@ -41,8 +40,8 @@ class Bcash_Pagamento_Model_PaymentMethod extends Mage_Payment_Model_Method_Abst
      */
     public function initialize($paymentAction, $stateObject)
     {
-        Mage::log('Called ' . __METHOD__ . ' with payment ' . $paymentAction);
-        Mage::log('Payment visitor: ' . Mage::helper('core/http')->getRemoteAddr());
+        //Mage::helper("bcash")->saveLog('Called ' . __METHOD__ . ' with payment ' . $paymentAction);
+        //Mage::helper("bcash")->saveLog('Payment Creditcard visitor: ' . Mage::helper('core/http')->getRemoteAddr());
         parent::initialize($paymentAction, $stateObject);
 
         if ($paymentAction != 'sale') {
@@ -56,7 +55,6 @@ class Bcash_Pagamento_Model_PaymentMethod extends Mage_Payment_Model_Method_Abst
 
         try {
             $result = $this->_customBeginPayment();
-            //Mage::log(print_r($result, true));
             $response = $result['response'];
             $payment_method = $result['payment_method'];
             $installments = $result['installments'];
@@ -118,7 +116,7 @@ class Bcash_Pagamento_Model_PaymentMethod extends Mage_Payment_Model_Method_Abst
             $cart->save();
 
         } catch (Exception $e) {
-            Mage::log($e->getMessage());
+            Mage::helper("bcash")->saveLog($e->getMessage());
             throw new Mage_Payment_Model_Info_Exception($e->getMessage());
         }
 
@@ -145,86 +143,11 @@ class Bcash_Pagamento_Model_PaymentMethod extends Mage_Payment_Model_Method_Abst
      */
     public function assignData($data)
     {
-        Mage::log('Assign Data with Bcash');
+        //Mage::helper("bcash")->saveLog('Creditcard :: Assign Data with Bcash');
         $result = parent::assignData($data);
         $params = Mage::app()->getFrontController()->getRequest()->getParams();
-        $params['installments_bcash'] = isset($params['installments_bcash']) ?$params['installments_bcash']:1;
-
-        //Adiciona Desconto ao Pedido caso 1x Credito, Boleto ou TEF (configurados no Backend)
-        if(isset($params['payment-method'])) {
-            $discount = 0;
-            if ($params['installments_bcash'] == 1) {
-                $discount = $this->calculateDiscount($params['payment-method']);
-            }
-            if(!empty($params['payment-method'])) {
-                $this->addDiscountToQuote($discount);
-            }
-        }
+        $params['installments_bcash'] = isset($params['installments_bcash']) ? $params['installments_bcash'] : 1;
 
         return $result;
-    }
-
-    public function calculateDiscount($payment_method)
-    {
-        $transaction = new Bcash_Pagamento_Helper_Transaction();
-        return $transaction->calculateDiscount($payment_method);
-    }
-
-    public function addDiscountToQuote($discountAmount = 0)
-    {
-        $cart = Mage::getSingleton('checkout/cart');
-        $objShippingAddress = $cart->getQuote()->getShippingAddress();
-
-
-        //Mage::log($objShippingAddress);
-
-        if($discountAmount > 0) {
-            // Update quote
-            Mage::dispatchEvent(
-                'sales_quote_payment_import_data_before',
-                array(
-                    'quote' => $cart->getQuote()
-                )
-            );
-            $discountDescription = $objShippingAddress->getDiscountDescription();
-            if(!empty($discountDescription)) { $discountDescription .= " + "; }
-
-            $objShippingAddress->setDiscountDescription($discountDescription . 'Meio de pagamento');
-
-
-            $grandTotal = $objShippingAddress->getGrandTotal();
-            $subTotalWithDiscount = $objShippingAddress->getSubtotalWithDiscount();
-            $baseGrandTotal = $objShippingAddress->getBaseGrandTotal();
-            $baseSubTotalWithDiscount = $objShippingAddress->getBaseSubtotalWithDiscount();
-
-            // Outros descontos aplicados
-            $objDiscountAmount = $objShippingAddress->getDiscountAmount();
-            if ($objDiscountAmount <> 0) {
-                $discountAmount = (-1 * ((-$discountAmount) + $objDiscountAmount));
-                $grandTotal = $grandTotal + (-1 * $objDiscountAmount);
-                $subTotalWithDiscount = $subTotalWithDiscount + (-1 * $objDiscountAmount);
-                $baseGrandTotal = $baseGrandTotal + (-1 * $objDiscountAmount);
-                $baseSubTotalWithDiscount = $baseSubTotalWithDiscount + (-1 * $objDiscountAmount);
-            }
-
-            $objShippingAddress->addTotal(array(
-                'code' => 'discount',
-                'title' => "Desconto",
-                'value' => -$discountAmount,
-            ));
-
-            $totalDiscountAmount = $discountAmount;
-            $subtotalWithDiscount = $subTotalWithDiscount - $discountAmount;
-            $baseTotalDiscountAmount = $discountAmount;
-            $baseSubtotalWithDiscount = $baseSubTotalWithDiscount - $discountAmount;
-
-            $objShippingAddress->setDiscountAmount(-$totalDiscountAmount);
-            $objShippingAddress->setSubtotalWithDiscount($subtotalWithDiscount);
-            $objShippingAddress->setBaseDiscountAmount($baseTotalDiscountAmount);
-            $objShippingAddress->setBaseSubtotalWithDiscount($baseSubtotalWithDiscount);
-            $objShippingAddress->setGrandTotal($grandTotal - $totalDiscountAmount);
-            $objShippingAddress->setBaseGrandTotal($baseGrandTotal - $baseTotalDiscountAmount);
-            $objShippingAddress->save();
-        }
     }
 }

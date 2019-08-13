@@ -3,49 +3,28 @@
     <sections>
         <payment>
             <groups>
-                <pagamento translate="label" module="pagamento">
-                    <label>Bcash - Pagamento Transparente</label>
+                <bcash translate="label" module="bcash">
+                    <label>Bcash - Configuração de Credenciais e Preferências</label>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
-
                     <fields>
-                        <active translate="label">
-                            <label>Habilitar m&#243;dulo</label>
-                            <tooltip>Deseja habilitar o m&#243;dulo?</tooltip>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </active>
-
                         <sandbox translate="label">
-                            <label>Sandbox</label>
+                            <label>Habilitar Sandbox?</label>
+                            <comment>Deixe o Sandbox habilitado somente para utilização de credenciais em ambiente de testes/homologação.</comment>
                             <tooltip>Deseja utilizar o m&#243;dulo em ambiente de testes?</tooltip>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>2</sort_order>
-                            <show_in_default>2</show_in_default>
-                            <show_in_website>2</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </sandbox>
-
-                        <title translate="label">
-                            <label>Titulo</label>
-                            <tooltip>Informe o nome que deve ser apresentado para este meio de pagamento no checkout de sua loja.</tooltip>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                        </title>
+                        </sandbox>
 
                         <email translate="label">
                             <label>Email cadastrado no Bcash</label>
-                            <comment>Clique &lt;a href=&quot;https://www.bcash.com.br/criar-conta-comprador/&quot; target=&quot;_blank&quot;&gt;aqui&lt;/a&gt; e cadastre-se.</comment>
+                            <comment>Não possui? Clique &lt;a href=&quot;https://www.bcash.com.br/criar-conta-comprador/&quot; target=&quot;_blank&quot;&gt;aqui&lt;/a&gt; e cadastre-se agora.</comment>
                             <frontend_type>text</frontend_type>
                             <validate>validate-email</validate>
                             <sort_order>4</sort_order>
@@ -56,7 +35,7 @@
 
                         <token translate="label">
                             <label>Token</label>
-                            <tooltip>Acesse a area de Gerenciamento de APIs no menu ferramentas do Bcash</tooltip>
+                            <comment>Acesse o menu do seu painel Bcash em "Ferramentas" > "Códigos Integração" > copie o código em "Sua Chave acesso"</comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
@@ -66,9 +45,10 @@
 
                         <consumer_key translate="label">
                             <label>Consumer Key</label>
-                            <tooltip>Solicite no atendimento do Bcash sua chave OAuth</tooltip>
+                            <comment>Acesse o menu do seu painel Bcash em "Ferramentas" > "Gerenciamento de APIs"</comment>
+                            <tooltip>Acesse o menu do seu painel Bcash em Ferramentas > Gerenciamento de APIs. Caso não esteja disponível essa opção entre em contato com a equipe do comercial solicitando a liberação da API através do e-mail: comercial@bcash.com.br.</tooltip>
                             <frontend_type>text</frontend_type>
-                            <sort_order>5</sort_order>
+                            <sort_order>6</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -77,85 +57,180 @@
                         <transacao_dependente>
                             <label>Transação dependente</label>
                             <tooltip>Adicione a comissão por transação dependente via Bcash, são válidos até 6 emails.</tooltip>
-                            <frontend_model>pagamento/adminhtml_dependentes</frontend_model>
+                            <frontend_model>bcash/adminhtml_dependentes</frontend_model>
                             <backend_model>adminhtml/system_config_backend_serialized</backend_model>
-                            <comment><![CDATA[Acesse seu painel no bcash.com.br e vá até "Ferramentas > Transação Dependente", o limite definido aqui não deve ultrapassar o valor definido no painel.]]></comment>
-                            <sort_order>6</sort_order>
+                            <comment><![CDATA[Acesse o menu do seu painel Bcash em "Ferramentas > Transação Dependente", o limite definido aqui não deve ultrapassar o valor definido no painel.]]></comment>
+                            <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
+                            <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <can_be_empty>0</can_be_empty>
                         </transacao_dependente>
-                        
-                        <desconto_boleto translate="label">
-                            <label>Percentual Desconto Boleto</label>
-                            <tooltip>Percentual de desconto em pagamentos via Boleto.</tooltip>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>7</sort_order>
-                            <validate>validate-number validate-number-range number-range-0-100</validate>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </desconto_boleto>
-
-                        <desconto_tef translate="label">
-                            <label>Percentual Desconto TEF</label>
-                            <tooltip>Percentual de desconto em pagamentos via TEF.</tooltip>
-                            <frontend_type>text</frontend_type>
-                            <validate>validate-number validate-number-range number-range-0-100</validate>
-                            <sort_order>8</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </desconto_tef>
-
-                        <desconto_credito_1x translate="label">
-                            <label>Percentual Desconto Cartão de Crédito 1x</label>
-                            <tooltip>Percentual de desconto em pagamentos via Cartão de crédito à vista.</tooltip>
-                            <frontend_type>text</frontend_type>
-                            <validate>validate-number validate-number-range number-range-0-100</validate>
-                            <sort_order>9</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </desconto_credito_1x>
-
-                        <max_installments translate="label">
-                            <label>Quantidade Máxima de Parcelas</label>
-                            <tooltip>Define o limite do número de parcelas</tooltip>
-                            <frontend_type>select</frontend_type>
-                            <source_model>pagamento/system_config_source_installments</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>2</show_in_default>
-                            <show_in_website>2</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </max_installments>
 
                         <cpf translate="label">
-                            <label>Habilitar CPF</label>
-                            <tooltip>Deseja exibir o campo CPF junto ao método de pagamento?</tooltip>
+                            <label>Solicitar CPF?</label>
+                            <comment>Habilite esta opção se sua loja não possui CPF como obrigatório na criação de conta do cliente.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>11</sort_order>
+                            <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </cpf>
 
                         <phone translate="label">
-                            <label>Habilitar Telefone</label>
-                            <tooltip>Deseja exibir o campo Telefone junto ao método de pagamento?</tooltip>
+                            <label>Solicitar Telefone?</label>
+                            <comment>Habilite esta opção se sua loja não possui Telefone como obrigatório na criação de conta do cliente.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>12</sort_order>
+                            <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </phone>
-
+                        <logfile translate="label">
+                            <label>Salvar Logs?</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Local do arquivo: var\log\bcash-magento.log</comment>
+                        </logfile>
                     </fields>
+                </bcash>
 
-                </pagamento>
+                <bcash_creditcard translate="label" module="bcash_creditcard">
+                    <label>Bcash - Cartão de Crédito</label>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Habilitado?</label>
+                            <tooltip>Deseja habilitar o método por Cartão de Crédito?</tooltip>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+
+                        <title translate="label">
+                            <label>Titulo do método de pagamento</label>
+                            <tooltip>Informe o nome que deve ser apresentado para este meio de pagamento no checkout de sua loja.</tooltip>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </title>
+
+                        <max_installments translate="label">
+                            <label>Quantidade máxima de parcelas</label>
+                            <tooltip>Define o limite do número de parcelas</tooltip>
+                            <frontend_type>select</frontend_type>
+                            <source_model>bcash/system_config_source_installments</source_model>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_installments>
+
+                        <sort_order translate="label">
+                            <label>Posição no Checkout</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                        </sort_order>
+                    </fields>
+                </bcash_creditcard>
+
+                <bcash_bankslip translate="label" module="bcash_bankslip">
+                    <label>Bcash - Boleto</label>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Habilitado?</label>
+                            <tooltip>Deseja habilitar o método por boleto?</tooltip>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+
+                        <title translate="label">
+                            <label>Titulo do método de pagamento</label>
+                            <tooltip>Informe o nome que deve ser apresentado para este meio de pagamento no checkout de sua loja.</tooltip>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </title>
+
+                        <sort_order translate="label">
+                            <label>Posição no Checkout</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                        </sort_order>
+                    </fields>
+                </bcash_bankslip>
+
+                <bcash_onlinetransfer translate="label" module="bcash_onlinetransfer">
+                    <label>Bcash - Transferência Online (TEF)</label>
+                    <sort_order>4</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Habilitado?</label>
+                            <tooltip>Deseja habilitar o método por TEF?</tooltip>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+
+                        <title translate="label">
+                            <label>Titulo do método de pagamento</label>
+                            <tooltip>Informe o nome que deve ser apresentado para este meio de pagamento no checkout de sua loja.</tooltip>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </title>
+
+                        <sort_order translate="label">
+                            <label>Posição no Checkout</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <frontend_class>validate-number</frontend_class>
+                        </sort_order>
+                    </fields>
+                </bcash_onlinetransfer>
             </groups>
         </payment>
     </sections>

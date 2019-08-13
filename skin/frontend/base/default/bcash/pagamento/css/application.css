@@ -17,7 +17,7 @@
 .payment-group li {
   display: inline-block;
   height: 42px;
-  padding: 10px 5px;
+  padding: 0px 5px;
 }
 
 .payment-group input[type='radio'] {
@@ -34,6 +34,17 @@
   opacity: 0;
 }
 
+/* logo bcash */
+
+.logo-bcash {
+  display: inline-block;
+  background: url(../images/application-sprite.png) no-repeat;
+  width: 48px;
+  height: 60px;
+  text-indent: -9999px;
+  background-position: 0 0;
+}
+
 .bandeira {
   display: inline-block;
   background: url(../images/application-sprite.png) no-repeat;
@@ -42,7 +53,6 @@
   text-indent: -9999px;
   cursor: pointer;
 }
-
 
 /* visa */
 
@@ -646,3 +656,19 @@ hr {
   filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
   opacity: 1;
 }
+
+/* Clear */
+.bcash-clr {
+  clear: both;
+}
+
+.bcash-checkout-success {
+  float:left;
+  width: 100%;
+  padding: 10px;
+}
+
+.bcash-checkout-success p {
+  padding-bottom: 10px;
+}
+

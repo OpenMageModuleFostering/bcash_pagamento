@@ -1,0 +1,31 @@
+<?php
+$info_payment = array();
+if (Mage::app()->getRequest()->getRouteName() == "sales"):
+    $info_payment = $this->getInfoPayment();
+endif;
+?>
+<link rel="stylesheet"
+      href="<?php echo $this->getSkinUrl('bcash/pagamento/css/application.css') ?>?v=<?php echo rand(); ?>"
+      type="text/css"/>
+<table cellspacing="0" class="form-list">
+    <tbody>
+    <tr>
+        <td class="label"><label>Meio de pagamento&nbsp;</label></td>
+        <td class="value"><label><strong><?php echo $this->getMethod()->getTitle() ?></strong></label></td>
+    </tr>
+    <?php foreach ($info_payment as $detalhes): ?>
+        <tr>
+            <?php if (!empty($detalhes['valor'])):
+                if ($detalhes['titulo'] == "method_payment"):
+                    echo '<td class="value"><label class="logo-bcash"></label></td>';
+                    echo '<td class="value"><label class="bandeira band-' . $detalhes['valor'] . '" style="pointer-events: none !important;"></label></td>';
+                else:
+                    echo '<td class="label"><label>' . $detalhes['titulo'] . '</label></td>';
+                    echo '<td class="value"><label><strong>' . ($detalhes['titulo'] == "Link" ? '<a href="' . $detalhes['valor'] . '" target="_blank">Acessar link de pagamento</a>' : $detalhes['valor']) . '</strong></label></td>';
+                endif;
+            endif; ?>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+<br/>

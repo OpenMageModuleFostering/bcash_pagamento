@@ -1,6 +1,7 @@
 <?php
 
-require_once(Mage::getBaseDir("lib") . "/BcashApi/autoloader.php");
+require_once(Mage::getBaseDir("lib") . "/Bcash/AutoLoader.php");
+Bcash\AutoLoader::register();
 
 use Bcash\Service\Notification;
 use Bcash\Domain\NotificationContent;
@@ -24,12 +25,11 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
     protected function _construct()
     {
         // access log (debug)
-        Mage::log('Notification visitor: ' . Mage::helper('core/http')->getRemoteAddr());
+        Mage::helper("bcash")->saveLog('Notification visitor: ' . Mage::helper('core/http')->getRemoteAddr());
 
-        $this->obj = Mage::getSingleton('Bcash_Pagamento_Model_PaymentMethod');
-        $this->email = $this->obj->getConfigData('email');
-        $this->token = $this->obj->getConfigData('token');
-        $this->sandbox = $this->obj->getConfigData('sandbox');
+        $this->email = Mage::getStoreConfig('payment/bcash/email');
+        $this->token = Mage::getStoreConfig('payment/bcash/token');
+        $this->sandbox = Mage::getStoreConfig('payment/bcash/sandbox');
     }
 
     /**
@@ -44,7 +44,7 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
             $statusId = (int)Mage::app()->getRequest()->getParam('statusId');
 
             // Notification Simulator
-            $urlSubmit = Mage::getUrl('pagamento/notification/index',array('_secure'=>true));
+            $urlSubmit = Mage::getUrl('bcash/notification/index',array('_secure'=>true));
             echo "<h1>Bcash Notification Simulator</h1>
               <form method='GET' action='" . $urlSubmit . "'>
                 <label>Nro. Pedido:</label>
@@ -65,7 +65,7 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
              </form>";
 
             if(!empty($transactionId) && !empty($statusId) && !empty($orderId)) {
-                $urlSimulator = Mage::getUrl('pagamento/notification/request',array('_secure'=>true));
+                $urlSimulator = Mage::getUrl('bcash/notification/request',array('_secure'=>true));
                 $returnSimulator = $this->notificationSimulator($urlSimulator, $transactionId, $orderId, $statusId);
                 echo "<h2>Retorno:</h2> <div style='clear:both;'></div><pre style='background-color: #EAEAEA; padding:20px;'>";
                 var_dump($returnSimulator);
@@ -110,18 +110,16 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
                     // Processamento da notificação no pedido
                     $this->processNotification($transactionId, $orderId, $statusId);
                 }else {
-                    Mage::log("Invalid bcash notification: Transaction: " . $transactionId . " - Status: " . $statusId);
+                    Mage::helper("bcash")->saveLog("Atencao!!! Notificacao invalida recebida: Transaction: " . $transactionId . " - Status: " . $statusId);
                 }
             } else {
-                Mage::log("Pedido " . $orderId . " não identificado. ");
+                Mage::helper("bcash")->saveLog("Atencao!!! Pedido " . $orderId . " nao identificado na notificacao recebida. ");
             }
         } catch (ValidationException $e) {
-            Mage::log("Validation error: " . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("Validation error - NotificationController->requestAction: " . $e->getMessage(), $e->getErrors());
 
         } catch (ConnectionException $e) {
-            Mage::log("Connection error: " . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("Connection error - NotificationController->requestAction: " . $e->getMessage(), $e->getErrors());
         }
     }
 
@@ -228,7 +226,7 @@ class Bcash_Pagamento_NotificationController extends Mage_Core_Controller_Front_
         }
 
         // Sinc datas
-        Mage::helper('pagamento')->updateOrderSyncBcashDataWithQuote($orderId, $quoteId);
+        Mage::helper('bcash')->updateOrderSyncBcashDataWithQuote($orderId, $quoteId);
     }
 
     /**

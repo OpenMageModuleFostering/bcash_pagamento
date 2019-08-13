@@ -34,6 +34,19 @@ class AutoLoader
      */
     public static function register($prepend = false)
     {
+        // Autoloader varien fix
+        $mageHandler = set_error_handler(function () {});
+        set_error_handler(function ($errno, $errstr, $errfile, $errline) use ($mageHandler) {
+            if (E_WARNING === $errno
+                && 0 === strpos($errstr, 'include(')
+                && substr($errfile, -19) == 'Varien/Autoload.php'
+            ){
+                return null;
+            }
+            return call_user_func($mageHandler, $errno, $errstr, $errfile, $errline);
+        });
+
+        // Autoloader register
         spl_autoload_register(array(new self, 'autoload'), true, $prepend);
     }
     /**

@@ -1,0 +1,24 @@
+<?php
+$info_payment = $this->getInfoPayment();
+
+?>
+<table cellspacing="0" class="form-list">
+    <tbody>
+    <tr>
+        <td class="label"><label>Meio de pagamento&nbsp;</label></td>
+        <td class="value"><label><strong><?php echo $this->getMethod()->getTitle() ?></strong></label></td>
+    </tr>
+    <?php foreach ($info_payment as $detalhes): ?>
+        <tr>
+            <?php if (!empty($detalhes['valor'])):
+                if ($detalhes['titulo'] == "method_payment"):
+                else:
+                    echo '<td class="label"><label>' . $detalhes['titulo'] . '</label></td>';
+                    echo '<td class="value"><label>' . ($detalhes['titulo'] == "Link" ? '<a href="' . $detalhes['valor'] . '" target="_blank">Acessar link de pagamento</a>' : $detalhes['valor']) . '</strong></label></td>';
+                endif;
+            endif; ?>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+<br/>

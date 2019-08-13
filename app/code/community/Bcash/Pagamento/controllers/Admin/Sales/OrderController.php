@@ -1,6 +1,7 @@
 <?php
 
-require_once(Mage::getBaseDir("lib") . "/BcashApi/autoloader.php");
+require_once(Mage::getBaseDir("lib") . "/Bcash/AutoLoader.php");
+Bcash\AutoLoader::register();
 
 use Bcash\Domain\NotificationStatusEnum;
 
@@ -93,11 +94,11 @@ class Bcash_Pagamento_Admin_Sales_OrderController extends Mage_Adminhtml_Control
                 $quoteId = $order->getQuoteId();
                 $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
                 $orderTransactionBcash = $quote->getTransactionIdBcash();
-                $transactionInfo = Mage::helper('pagamento')->getTransaction($orderTransactionBcash);
+                $transactionInfo = Mage::helper('bcash')->getTransaction($orderTransactionBcash);
 
                 // Checa se o status da transaçao Bcash permite cancelamento
                 if($transactionInfo->transacao->cod_status == NotificationStatusEnum::IN_PROGRESS || $transactionInfo->transacao->cod_status == NotificationStatusEnum::APPROVED) {
-                    $pagamentoOrderModel = Mage::getModel('pagamento/order');
+                    $pagamentoOrderModel = Mage::getModel('bcash/order');
                     $responseCancellation = $pagamentoOrderModel->cancellation($orderTransactionBcash);
 
                     if ($responseCancellation != null) {
@@ -140,7 +141,7 @@ class Bcash_Pagamento_Admin_Sales_OrderController extends Mage_Adminhtml_Control
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
                 $this->_getSession()->addError($this->__('The order has not been cancelled.'));
-                Mage::log("Cancellation error: " . $e->getMessage());
+                Mage::helper("bcash")->saveLog("Cancellation error - OrderController->cancelBcashTransaction: " . $e->getMessage(), $e->getErrors());
             }
         }
 

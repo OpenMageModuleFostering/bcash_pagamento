@@ -1,26 +1,19 @@
-<!-- <h1>Bcash</h1> -->
-<link rel="stylesheet" href="<?php echo $this->getSkinUrl('bcash/pagamento/css/application.css') ?>" type="text/css"/>
-<!-- Script Start -->
-<!--<script type="text/javascript" src="<?php echo $this->getSkinUrl('bcash/pagamento/js/payment.js'); ?>"></script>//-->
-<!-- Script End -->
 <?php
-$code = $this->getCode();
+$code = $this->getMethodCode();
 $paymentMethods = $this->getPaymentMethods();
 $paymentInstallments = $this->getInstallments();
 $size = count($paymentMethods);
-$paymentGroupName = array(
-    'CARD' => "Cartão de cr&eacute;dito",
-    'BANKSLIP' => "Boleto Banc&aacute;rio",
-    'ONLINE_TRANSFER' => "Transfer&ecirc;ncia Banc&aacute;ria"
-);
 ?>
 <div id="payment-<?php echo $code; ?>">
-
-    <div class="form-list" id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;">
-        <div class="payment-group" >
+    <link rel="stylesheet"
+          href="<?php echo $this->getSkinUrl('bcash/pagamento/css/application.css') ?>?v=<?php echo rand(); ?>"
+          type="text/css"/>
+    <?php if ($this->getCpf() || $this->getPhone()) : ?>
+    <div class="form-list" id="payment_form_<?php echo $code; ?>" style="display:none;">
+        <div class="payment-group">
 
             <div class="b-row" style="padding-left:15px; margin-bottom:10px">
-                <?php if($this->getCpf()) : ?>
+                <?php if ($this->getCpf()) : ?>
                     <div class="" style="float:left; width:40%; margin:2px">
                         <label>CPF/CNPJ do titular</label>
                         <input type="text" class="b-form-control validate-cpf-cnpj" id="cpf_cnpj_bcash"
@@ -28,9 +21,9 @@ $paymentGroupName = array(
                                maxlength="18" autocomplete="off"/>
                     </div>
                 <?php endif; ?>
-                <?php if($this->getPhone()) : ?>
+                <?php if ($this->getPhone()) : ?>
                     <div class="" style="float:left; width:53%; margin:3px; margin-left:10px">
-                        <label>Telefone do titular</label><br />
+                        <label>Telefone do titular</label><br/>
 
                         <div style="width: 53px; float: left;">
                             <input type="text" class="b-form-control validate-ddd" maxlength="2" value=""
@@ -48,138 +41,151 @@ $paymentGroupName = array(
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
-    <div id="payment-bcash-group">
-    <?php foreach ($paymentMethods as $paymentType => $payments): ?>
+    <div id="payment-bcash-group-<?php echo $code; ?>">
         <?php
-            $totalPayments = count($payments);
-            if($totalPayments > 0):
-        ?>
-            <div class="payment-group">
-                <div>
-                    <h3><?php echo $paymentGroupName[$paymentType] ?></h3>
-                    <ul>
-                        <?php foreach ($payments as $payment): ?>
-                            <li>
-                                <input type="radio" class="payment-method-bcash validate-one-required-by-name"
-                                       id="payment-method-<?php echo $payment->id ?>" name="payment-method"
-                                       value="<?php echo $payment->id ?>" class/>
-                                <label class="bandeira band-<?php echo $payment->id ?>"
-                                       for="payment-method-<?php echo $payment->id ?>"></label>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-
-                <?php if ($paymentType == 'CARD'): ?>
-
-                    <div id="card-conteiner" class="b-form-group b-hide">
-                        <div class="b-n-row">
-                            <div class="b-form-group b-col-xs-8">
-                                <label>N&uacute;mero do cart&atilde;o</label>
-                                <input type="text" class="b-form-control validate-number-card" maxlength="20" value=""
-                                       id="card_number_bcash"
-                                       name="card_number_bcash"
-                                       autocomplete="off" style="width:100%">
-                            </div>
-                            <div class="b-form-group b-col-xs-4" style="padding:0px">
-                                <div>
-                                    <label>CVV <span class="icon-tooltip" data-tooltip="Código de segurança do cartão de crédito.">?</span></label>
-                                    <input type="text" class="b-form-control validate-ccv-card" maxlength="3" value=""
-                                           name="cvv_bcash"
-                                           id="cvv_bcash">
-                                </div>
-                            </div>
+        if($size > 0) {
+            foreach ($paymentMethods as $paymentType => $payments) { ?>
+                <?php
+                $totalPayments = count($payments);
+                if ($totalPayments > 0) {
+                    ?>
+                    <div class="payment-group">
+                        <div>
+                            <ul>
+                                <?php foreach ($payments as $payment) { ?>
+                                    <li>
+                                        <input type="radio"
+                                               class="payment-method-bcash-<?php echo $code; ?> validate-one-required-by-name"
+                                               id="payment-method-<?php echo $payment->id ?>" name="bcash-payment-method"
+                                               value="<?php echo $payment->id ?>" class/>
+                                        <label
+                                            class="bandeira bandeira-<?php echo $code; ?> band-<?php echo $payment->id ?>"
+                                            for="payment-method-<?php echo $payment->id ?>"></label>
+                                    </li>
+                                <?php } ?>
+                            </ul>
                         </div>
-                        <div class="b-n-row">
-                            <div class="b-form-group b-col-xs-5" style="padding-right:0px">
-                                <label class="">Validade</label>
 
-                                <div class="b-form-group">
-                                    <div class="b-col-xs-5" style="padding:0px">
-                                        <select class="b-form-control validate-month-bcash" id="month_bcash"
-                                                name="month_bcash" style="padding: 2px;">
-                                            <option value=""></option>
+                        <?php if ($paymentType == 'CARD'): ?>
+
+                            <div id="card-conteiner" class="b-form-group b-hide">
+                                <div class="b-n-row">
+                                    <div class="b-form-group b-col-xs-8">
+                                        <label>N&uacute;mero do cart&atilde;o</label>
+                                        <input type="text" class="b-form-control validate-number-card" maxlength="20"
+                                               value=""
+                                               id="card_number_bcash"
+                                               name="card_number_bcash"
+                                               autocomplete="off" style="width:100%">
+                                    </div>
+                                    <div class="b-form-group b-col-xs-4" style="padding:0px">
+                                        <div>
+                                            <label>CVV <span class="icon-tooltip"
+                                                             data-tooltip="Código de segurança do cartão de crédito.">?</span></label>
+                                            <input type="text" class="b-form-control validate-ccv-card" maxlength="3"
+                                                   value=""
+                                                   name="cvv_bcash"
+                                                   id="cvv_bcash">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="b-n-row">
+                                    <div class="b-form-group b-col-xs-5" style="padding-right:0px">
+                                        <label class="">Validade</label>
+
+                                        <div class="b-form-group">
+                                            <div class="b-col-xs-5" style="padding:0px">
+                                                <select class="b-form-control validate-month-bcash" id="month_bcash"
+                                                        name="month_bcash" style="padding: 2px;">
+                                                    <option value=""></option>
+                                                    <?php
+                                                    for ($i = 1; $i < 13; $i++) :
+                                                        $month = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                                        ?>
+                                                        <option value="<?php echo $month ?>"><?php echo $month ?></option>
+                                                        <?php
+                                                    endfor;
+                                                    ?>
+                                                </select>
+                                            </div>
+                                            <div class="b-col-xs-7" style="padding:0px; padding-left:4px">
+                                                <select class="b-form-control validate-year-bcash" id="year_bcash"
+                                                        name="year_bcash" style="padding: 2px;">
+                                                    <option value=""></option>
+                                                    <?php
+                                                    $year = date("Y");
+                                                    $endYear = $year + 10;
+                                                    for ($i = $year; $i < $endYear; $i++) :
+                                                        $month = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                                        ?>
+                                                        <option value="<?php echo $month ?>"><?php echo $month ?></option>
+                                                        <?php
+                                                    endfor;
+                                                    ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="b-form-group b-col-xs-7" style="padding-right:0px">
+                                        <label>Parcelas</label>
+                                        <select class="b-form-control validate-installments-bcash" name="installments_bcash"
+                                                id="installments_bcash" style="max-width:100% !important">
+                                            <option value="" disabled> (Selecione o número de parcelas)</option>
                                             <?php
-                                            for ($i = 1; $i < 13; $i++) :
-                                                $month = str_pad($i, 2, '0', STR_PAD_LEFT);
-                                                ?>
-                                                <option value="<?php echo $month ?>"><?php echo $month ?></option>
-                                                <?php
-                                            endfor;
+                                            $okInstallments = $paymentInstallments['ok'];
+                                            $installments = $paymentInstallments["installments"];
+                                            if (!$okInstallments) :
+                                                foreach ($installments as $times => $value) :
+                                                    ?>
+                                                    <option value="<?php echo $times ?>"><?php echo $times ?>x -
+                                                        R$ <?php echo number_format($value, 2, ',', '.') ?></option>
+                                                    <?php
+                                                endforeach;
+                                            endif;
                                             ?>
                                         </select>
                                     </div>
-                                    <div class="b-col-xs-7" style="padding:0px; padding-left:4px">
-                                        <select class="b-form-control validate-year-bcash" id="year_bcash"
-                                                name="year_bcash" style="padding: 2px;">
-                                            <option value=""></option>
-                                            <?php
-                                            $year = date("Y");
-                                            $endYear = $year + 10;
-                                            for ($i = $year; $i < $endYear; $i++) :
-                                                $month = str_pad($i, 2, '0', STR_PAD_LEFT);
-                                                ?>
-                                                <option value="<?php echo $month ?>"><?php echo $month ?></option>
-                                                <?php
-                                            endfor;
-                                            ?>
-                                        </select>
+                                </div>
+
+                                <div class="b-n-row">
+                                    <div class="b-form-group" style="padding-left:17px">
+                                        <label>Nome titular</label>
+                                        <input type="text" class="b-form-control validate-name-card" value=""
+                                               name="name_card_bcash"
+                                               id="name_card_bcash" maxlength="100"
+                                               autocomplete="off" style="width:100%">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="b-form-group b-col-xs-7" style="padding-right:0px">
-                                <label>Parcelas</label>
-                                <select class="b-form-control validate-installments-bcash" name="installments_bcash" id="installments_bcash" style="max-width:100% !important">
-                                    <option value="" disabled> (Selecione o número de parcelas) </option>
-                                    <?php
-                                    $okInstallments = $paymentInstallments['ok'];
-                                    $installments = $paymentInstallments["installments"];
-                                    if (!$okInstallments) :
-                                        foreach ($installments as $times => $value) :
-                                            ?>
-                                            <option value="<?php echo $times ?>"><?php echo $times ?>x - R$ <?php echo number_format($value,2,',','.')?></option>
-                                            <?php
-                                        endforeach;
-                                    endif;
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
 
-                        <div  class="b-n-row">
-                            <div class="b-form-group" style="padding-left:17px">
-                                <label>Nome titular</label>
-                                <input type="text" class="b-form-control validate-name-card" value="" name="name_card_bcash"
-                                       id="name_card_bcash" maxlength="100"
-                                       autocomplete="off" style="width:100%">
-                            </div>
-                        </div>
+                                <div class="b-row">
 
-                        <div class="b-row">
-
-                        </div>
+                                </div>
 
 
-                    </div> <!-- card-conteiner -->
+                            </div> <!-- card-conteiner -->
 
-                <?php endif; ?>
+                        <?php endif; ?>
 
-                <?php if ($size > 1): ?>
-                    <hr>
-                <?php endif ?>
-            </div>
-        <?php endif; ?>
-        <!-- payment-group -->
-        <?php
-        $size--;
-    endforeach; ?>
+                        <?php if ($size > 1) { ?>
+                            <hr>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
+                <!-- payment-group -->
+                <?php
+                $size--;
+            }
+        }else {
+            echo "Meio de pagamento indispon&iacute;vel no momento. Verifique suas credenciais e tente novamente.";
+        } ?>
     </div>
 </div>
 <!-- div b-col-xs-4 -->
 <script type="text/javascript">
     //<![CDATA[
-    var requestUrl = '<?php echo Mage::getUrl('pagamento/payment/dados',array('_secure'=>true)) ?>';
+    var requestUrl = '<?php echo Mage::getUrl('bcash/payment/dados',array('_secure'=>true)) ?>';
 
     function in_array(needle, haystack, argStrict) {
         var key = '',
@@ -240,37 +246,38 @@ $paymentGroupName = array(
     echo "];";
 ?>
 
-    var initBcashPagamento = function () {
+    var initBcashCreditCardPagamento = function () {
         checkPaymentOnLoad();
         uncheckBcashPaymentMethods();
 
         function parseJSON(data) {
-            return (window.JSON && window.JSON.parse ? window.JSON.parse( data ) : (new Function("return " + data))());
+            return (window.JSON && window.JSON.parse ? window.JSON.parse(data) : (new Function("return " + data))());
         }
 
-        function showInstallmentsOnlyForMethod(method)
-        {
+        function showInstallmentsOnlyForMethod(method) {
             changeInstallmentsSelect("Carregando...");
             // Update installments before show
             updateInstallments(method);
         }
 
-        function showInstallmentsSelectBox(method, installmentsStr)
-        {
+        function showInstallmentsSelectBox(method, installmentsStr) {
             var newInstallments = eval('(' + installmentsStr + ')');
 
             if (in_array(method, cards)) {
                 var select_id = 'installments_bcash';
-                var select =  document.getElementById(select_id);
+                var select = document.getElementById(select_id);
 
-                if(newInstallments.length > 1) {
+                if (newInstallments.length > 1) {
                     // Remove options
-                    var i; for(i=select.options.length-1; i>=0; i--) { select.remove(i); }
+                    var i;
+                    for (i = select.options.length - 1; i >= 0; i--) {
+                        select.remove(i);
+                    }
 
                     // Add options
                     var option = '';
-                    for (i=0; i < newInstallments.length; i++) {
-                        if(newInstallments[i].ccId == 0) {
+                    for (i = 0; i < newInstallments.length; i++) {
+                        if (newInstallments[i].ccId == 0) {
                             option = document.createElement("option");
                             option.text = newInstallments[i].ccDescript;
                             option.value = '';
@@ -278,7 +285,7 @@ $paymentGroupName = array(
                             select.add(option);
                             option = '';
                         }
-                        if(newInstallments[i].ccId == method) {
+                        if (newInstallments[i].ccId == method) {
                             option = document.createElement("option");
                             option.text = newInstallments[i].ccDescript;
                             option.value = newInstallments[i].ccNumber;
@@ -293,9 +300,12 @@ $paymentGroupName = array(
 
         function changeInstallmentsSelect(text) {
             var changeSelect_id = 'installments_bcash';
-            var changeSelect =  document.getElementById(changeSelect_id);
+            var changeSelect = document.getElementById(changeSelect_id);
             // Remove installments options
-            var i; for(i=changeSelect.options.length-1; i>=0; i--) { changeSelect.remove(i); }
+            var i;
+            for (i = changeSelect.options.length - 1; i >= 0; i--) {
+                changeSelect.remove(i);
+            }
             var changeOption = document.createElement("option");
             changeOption.text = text;
             changeOption.value = '';
@@ -308,33 +318,33 @@ $paymentGroupName = array(
             cvvInput = document.getElementById("cvv_bcash");
             cvvInput.value = '';
             // Amex
-            if(card == american_express) {
+            if (card == american_express) {
                 cvvInput.maxLength = 4;
-            }else {
+            } else {
                 cvvInput.maxLength = 3;
             }
 
-            if(cvvInput.hasClassName("validation-passed")) {
+            if (cvvInput.hasClassName("validation-passed")) {
                 cvvInput.removeClassName("validation-passed");
             }
 
             // CVV não obrigatório
-            if(card == aura) {
-                if(cvvInput.hasClassName("validate-ccv-card")) {
+            if (card == aura) {
+                if (cvvInput.hasClassName("validate-ccv-card")) {
                     cvvInput.removeClassName("validate-ccv-card");
                 }
-            }else {
-                if(!cvvInput.hasClassName("validate-ccv-card")) {
+            } else {
+                if (!cvvInput.hasClassName("validate-ccv-card")) {
                     cvvInput.addClassName("validate-ccv-card");
                 }
             }
         }
 
         function forceReloadOrderReviewOsc() {
-            if (typeof(OSCPayment) !== 'undefined') {                
+            if (typeof(OSCPayment) !== 'undefined') {
                 OSCPayment.forcesavePayment();
             }
-            if(typeof(checkout) !== 'undefined') {
+            if (typeof(checkout) !== 'undefined') {
                 if ((typeof(checkout.update) !== 'undefined') && (typeof(checkout.urls) !== 'undefined')) {
                     checkout.update(checkout.urls.payment_method);
                 }
@@ -345,25 +355,25 @@ $paymentGroupName = array(
             var hasChecked = 0;
             var isBcash = 0;
             document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
-                if(e.checked == true) {
+                if (e.checked == true) {
                     hasChecked = 1;
-                    if(e.value == 'pagamento') {
+                    if (e.value == 'bcash_creditcard') {
                         isBcash = 1;
                         showBcashPaymentMethod();
                     }
                 }
             });
 
-            if(hasChecked == 0 && isBcash == 0) {
+            if (hasChecked == 0 && isBcash == 0) {
                 document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
-                    if(e.value == 'pagamento') {
+                    if (e.value == 'bcash_creditcard') {
                         e.checked = true;
                         showBcashPaymentMethod();
                     }
                 });
             }
 
-            if(hasChecked == 1 && isBcash == 0) {
+            if (hasChecked == 1 && isBcash == 0) {
                 hideBcashPaymentMethod();
             }
         }
@@ -404,7 +414,7 @@ $paymentGroupName = array(
             if (iscard) {
                 if (v.length > 0) {
                     return validateCardNumber();
-                }else {
+                } else {
                     return false;
                 }
             }
@@ -492,7 +502,7 @@ $paymentGroupName = array(
             showInstallmentsOnlyForMethod(paymentRadio.value);
             ableCvv(paymentRadio.value);
             document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
-                if(e.value == 'pagamento') {
+                if (e.value == 'bcash_creditcard') {
                     e.checked = true;
                 }
             });
@@ -516,7 +526,7 @@ $paymentGroupName = array(
         }
 
         function disableUnunsed(paymentRadio) {
-            var paymentRadios = document.getElementsByClassName("payment-method-bcash");
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash-<?php echo $code; ?>");
             for (var i = paymentRadios.length - 1; i >= 0; i--) {
                 paymentRadios[i].disabled = true;
             }
@@ -525,7 +535,6 @@ $paymentGroupName = array(
         }
 
         function isCard(element) {
-            //console.log(element);
             return cards.indexOf(element.value) > -1;
         }
 
@@ -582,7 +591,7 @@ $paymentGroupName = array(
             if (key == 8 || key == 46 || key == 37 || key == 39 || key == 9 || key == 35 || key == 36) {
                 return true;
             }
-            else if ( key < 48 || key > 57 ) {
+            else if (key < 48 || key > 57) {
                 return false;
             }
             return true;
@@ -678,7 +687,7 @@ $paymentGroupName = array(
             }
         }
 
-        var paymentsOptions = document.getElementsByClassName("bandeira");
+        var paymentsOptions = document.getElementsByClassName("bandeira-<?php echo $code; ?>");
         for (var i = paymentsOptions.length - 1; i >= 0; i--) {
             var paymentFlags = paymentsOptions[i];
             paymentFlags.onclick = clickFlag;
@@ -717,9 +726,10 @@ $paymentGroupName = array(
                 }
             });
             var $isCard = isCard(ElementPaymentMethod);
-            // console.log($isCard);
+
             return {'element': ElementPaymentMethod, 'isCard': $isCard};
         }
+
         <?php if($this->getCpf()) : ?>
         $('cpf_cnpj_bcash').observe('blur', function (e) {
             var RegExp = /^[0-9]{11,14}$/;
@@ -810,8 +820,7 @@ $paymentGroupName = array(
         });
         <?php endif; ?>
 
-        function validateCardNumber()
-        {
+        function validateCardNumber() {
             var RegExpHipercard = /^(3841\d{10}(\d{3})?)|(3841\d{15})$/;
             var RegExpElo = /^((((636368)|(438935)|(504175)|(451416)|(636297))\d{0,10})|((5067)|(4576)|(4011))\d{0,12})$/;
             var RegExpElo2 = /^(636368|438935|504175|451416|636297)([0-9]{10})$/;
@@ -825,7 +834,9 @@ $paymentGroupName = array(
             if (paymentRadio.isCard) {
                 var cardNumber = document.getElementById("card_number_bcash").value;
                 cardNumber = cardNumber.trim();
-                if(cardNumber.length <= 0) { return false; }
+                if (cardNumber.length <= 0) {
+                    return false;
+                }
                 var codeCard = paymentRadio.element.value;
                 switch (parseInt(codeCard)) {
                     case visa:
@@ -838,19 +849,27 @@ $paymentGroupName = array(
                         RegexFinal = RegExpAmex;
                         break;
                     case elo:
-                        if(cardNumber.length <= 16) { return true; }
+                        if (cardNumber.length <= 16) {
+                            return true;
+                        }
                         RegexFinal = RegExpElo;
                         break;
                     case hipercard:
-                        if(cardNumber.length >= 16 && cardNumber.length <= 19) { return true; }
+                        if (cardNumber.length >= 16 && cardNumber.length <= 19) {
+                            return true;
+                        }
                         RegexFinal = RegExpHipercard;
                         break;
                     case dinners:
-                        if(cardNumber.length >= 14 && cardNumber.length <= 16) { return true; }
+                        if (cardNumber.length >= 14 && cardNumber.length <= 16) {
+                            return true;
+                        }
                         RegexFinal = RegExpDiners;
                         break;
                     case aura:
-                        if(cardNumber.length == 19) { return true; }
+                        if (cardNumber.length == 19) {
+                            return true;
+                        }
                         RegexFinal = RegExpAura;
                         break;
                 }
@@ -869,11 +888,11 @@ $paymentGroupName = array(
         }
 
         function updateInstallments(method) {
-            new Ajax.Request('<?php echo Mage::getUrl('pagamento/payment/installments',array('_secure'=>true)) ?>', {
+            new Ajax.Request('<?php echo Mage::getUrl('bcash/payment/installments',array('_secure'=>true)) ?>', {
                 method: 'post',
                 parameters: 'method=' + method,
                 onSuccess: successGetInstallments,
-                onFailure:  failureGetInstallments
+                onFailure: failureGetInstallments
             });
         }
 
@@ -887,17 +906,17 @@ $paymentGroupName = array(
             showInstallmentsSelectBox(strMethodResponse, strInstallmentsResponse);
         }
 
-        function failureGetInstallments(response){
-            alert("Falha inesperada ao atualizar parcelamentos. Por favor, selecione o meio de pagamento novamente." );
+        function failureGetInstallments(response) {
+            alert("Falha inesperada ao atualizar parcelamentos. Por favor, selecione o meio de pagamento novamente.");
         }
 
         function hideBcashPaymentMethod() {
             var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
-            var paymentBcashConteiner = document.getElementById('payment-bcash-group');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group-<?php echo $code; ?>');
 
             // cards
             var cardConteiner = document.getElementById('card-conteiner');
-            if(!hasClass(cardConteiner, 'b-hide')){
+            if (!hasClass(cardConteiner, 'b-hide')) {
                 cardConteiner.className = cardConteiner.className + " b-hide";
             }
             disableCardForm();
@@ -908,16 +927,16 @@ $paymentGroupName = array(
                     element.checked = false;
                 }
             });
-            var paymentRadios = document.getElementsByClassName("payment-method-bcash");
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash-<?php echo $code; ?>");
             for (var i = paymentRadios.length - 1; i >= 0; i--) {
-                if(hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
+                if (hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
                     paymentRadios[i].className = paymentRadios[i].className.replace(/\bvalidate-one-required-by-name\b/, '');
                 }
                 paymentRadios[i].disabled = true;
             }
 
             // all
-            if(!hasClass(paymentBcashConteiner, 'b-hide')){
+            if (!hasClass(paymentBcashConteiner, 'b-hide')) {
                 paymentBcashConteiner.className = paymentBcashConteiner.className + " b-hide";
             }
             if (!hasClass(paymentConteiner, 'b-hide')) {
@@ -935,16 +954,16 @@ $paymentGroupName = array(
 
         function showBcashPaymentMethod() {
             var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
-            var paymentBcashConteiner = document.getElementById('payment-bcash-group');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group-<?php echo $code; ?>');
 
-            var paymentRadios = document.getElementsByClassName("payment-method-bcash");
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash-<?php echo $code; ?>");
             for (var i = paymentRadios.length - 1; i >= 0; i--) {
-                if(!hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
+                if (!hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
                     paymentRadios[i].className = paymentRadios[i].className + " validate-one-required-by-name";
                 }
                 paymentRadios[i].disabled = false;
             }
-            if(hasClass(paymentBcashConteiner, 'b-hide')) {
+            if (hasClass(paymentBcashConteiner, 'b-hide')) {
                 paymentBcashConteiner.className = paymentBcashConteiner.className.replace(/\bb-hide\b/, '');
             }
             if (hasClass(paymentConteiner, 'b-hide')) {
@@ -955,8 +974,8 @@ $paymentGroupName = array(
         $(document).on('change', 'input[type=radio][name=payment[method]]', function (event) {
             var target = event.target;
             var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
-            var paymentBcashConteiner = document.getElementById('payment-bcash-group');
-            if(target.id == 'p_method_pagamento') {
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group-<?php echo $code; ?>');
+            if (target.id == 'p_method_bcash_creditcard') {
                 showBcashPaymentMethod();
             } else {
 
@@ -986,6 +1005,6 @@ $paymentGroupName = array(
             event.preventDefault();
         });
     };
-    initBcashPagamento();
+    initBcashCreditCardPagamento();
     //]]>
 </script>

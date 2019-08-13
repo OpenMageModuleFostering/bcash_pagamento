@@ -1,10 +1,7 @@
 <?php
 $_order = $this->getOrder();
-
 $quoteId = $_order->getQuoteId();
-
 $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
-
 $payment_link = $quote->getPaymentLinkBcash();
 ?>
 

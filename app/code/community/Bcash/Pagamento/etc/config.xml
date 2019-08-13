@@ -1,11 +1,59 @@
 <?xml version="1.0"?>
 <config>
     <modules>
+
         <Bcash_Pagamento>
-            <version>0.1.0</version>
+            <version>1.2.2</version>
         </Bcash_Pagamento>
+
+        <Bcash_Creditcard>
+            <version>1.2.2</version>
+        </Bcash_Creditcard>
+
+        <Bcash_Bankslip>
+            <version>1.2.2</version>
+        </Bcash_Bankslip>
+
+        <Bcash_Onlinetransfer>
+            <version>1.2.2</version>
+        </Bcash_Onlinetransfer>
+
     </modules>
+
     <global>
+        <models>
+            <bcash>
+                <class>Bcash_Pagamento_Model</class>
+            </bcash>
+        </models>
+        <blocks>
+            <bcash>
+                <class>Bcash_Pagamento_Block</class>
+            </bcash>
+            <bcash_adminhtml>
+                <class>Bcash_Pagamento_Block_Adminhtml</class>
+            </bcash_adminhtml>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_view>Bcash_Pagamento_Block_Adminhtml_Sales_Order_View</sales_order_view>
+                    <sales_order_grid>Bcash_Pagamento_Block_Adminhtml_Sales_Order_Grid</sales_order_grid>
+                </rewrite>
+            </adminhtml>
+        </blocks>
+        <helpers>
+            <bcash>
+                <class>Bcash_Pagamento_Helper</class>
+            </bcash>
+            <bcash_creditcard>
+                <class>Bcash_Pagamento_Helper</class>
+            </bcash_creditcard>
+            <bcash_bankslip>
+                <class>Bcash_Pagamento_Helper</class>
+            </bcash_bankslip>
+            <bcash_onlinetransfer>
+                <class>Bcash_Pagamento_Helper</class>
+            </bcash_onlinetransfer>
+        </helpers>
         <fieldsets>
             <sales_convert_quote>
                 <transaction_id_bcash>
@@ -66,30 +114,7 @@
                 </phone_bcash>
             </sales_convert_order>
         </fieldsets>
-        <helpers>
-            <pagamento>
-                <class>Bcash_Pagamento_Helper</class>
-            </pagamento>
-        </helpers>
-        <blocks>
-            <pagamento>
-                <class>Bcash_Pagamento_Block</class>
-            </pagamento>
-            <pagamento_adminhtml>
-                <class>Bcash_Pagamento_Block_Adminhtml</class>
-            </pagamento_adminhtml>
-            <adminhtml>
-                <rewrite>
-                    <sales_order_view>Bcash_Pagamento_Block_Adminhtml_Sales_Order_View</sales_order_view>
-                    <sales_order_grid>Bcash_Pagamento_Block_Adminhtml_Sales_Order_Grid</sales_order_grid>
-                </rewrite>
-            </adminhtml>
-        </blocks>
-        <models>
-            <pagamento>
-                <class>Bcash_Pagamento_Model</class>
-            </pagamento>
-        </models>
+
         <resources>
             <pagamento_setup>
                 <setup>
@@ -126,15 +151,16 @@
             </order>
         </sales>
     </global>
+
     <admin>
         <routers>
-            <pagamento>
+            <bcash>
                 <use>admin</use>
                 <args>
                     <module>Bcash_Pagamento</module>
-                    <frontName>pagamento</frontName>
+                    <frontName>bcash</frontName>
                 </args>
-            </pagamento>
+            </bcash>
         </routers>
     </admin>
     <adminhtml>
@@ -143,15 +169,31 @@
                 <observers>
                     <sales_order_save_commit_after_handler>
                         <type>model</type>
-                        <class>pagamento/observer</class>
+                        <class>bcash/observer</class>
                         <method>checkOrderState</method>
                         <args></args>
                     </sales_order_save_commit_after_handler>
                 </observers>
             </sales_order_save_commit_after>
-    </events>
+        </events>
     </adminhtml>
     <frontend>
+        <routers>
+            <bcash>
+                <use>standard</use>
+                <args>
+                    <module>Bcash_Pagamento</module>
+                    <frontName>bcash</frontName>
+                </args>
+            </bcash>
+        </routers>
+        <layout>
+            <updates>
+                <bcash_pagamento>
+                    <file>bcash/pagamento/layout.xml</file>
+                </bcash_pagamento>
+            </updates>
+        </layout>
         <events>
             <checkout_onepage_controller_success_action>
                 <observers>
@@ -179,34 +221,45 @@
             </sales_quote_payment_import_data_before>
         </events>
     </frontend>
+
     <default>
         <payment>
-            <pagamento>
-                <title>Bcash</title>
+            <bcash>
+                <logfile>0</logfile>
+                <sandbox>1</sandbox>
+				<allowspecific>0</allowspecific>
+            </bcash>
+
+            <bcash_creditcard>
                 <active>1</active>
-                <model>pagamento/paymentMethod</model>
+                <title>Bcash - Cartão de Crédito</title>
+                <model>Bcash_Pagamento_Model_Creditcard</model>
                 <order_status>1</order_status>
                 <payment_action>sale</payment_action>
                 <allowspecific>0</allowspecific>
-            </pagamento>
+                <sort_order>-3</sort_order>
+                <max_installments>24</max_installments>
+            </bcash_creditcard>
+
+            <bcash_bankslip>
+                <active>1</active>
+                <title>Bcash - Boleto</title>
+                <model>Bcash_Pagamento_Model_Bankslip</model>
+                <order_status>1</order_status>
+                <payment_action>sale</payment_action>
+                <allowspecific>0</allowspecific>
+                <sort_order>-2</sort_order>
+            </bcash_bankslip>
+
+            <bcash_onlinetransfer>
+                <active>1</active>
+                <title>Bcash - Transferência Online (TEF)</title>
+                <model>Bcash_Pagamento_Model_Onlinetransfer</model>
+                <order_status>1</order_status>
+                <payment_action>sale</payment_action>
+                <allowspecific>0</allowspecific>
+                <sort_order>-1</sort_order>
+            </bcash_onlinetransfer>
         </payment>
     </default>
-    <frontend>
-        <routers>
-            <pagamento>
-                <use>standard</use>
-                <args>
-                    <module>Bcash_Pagamento</module>
-                    <frontName>pagamento</frontName>
-                </args>
-            </pagamento>
-        </routers>
-        <layout>
-            <updates>
-                <bcash_pagamento>
-                    <file>bcash/pagamento/layout.xml</file>
-                </bcash_pagamento>
-            </updates>
-        </layout>
-    </frontend>
 </config>

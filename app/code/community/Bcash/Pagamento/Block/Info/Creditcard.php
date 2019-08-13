@@ -1,10 +1,22 @@
 <?php
 
 /**
- * Class Bcash_Pagamento_Block_Info_Payment
+ * Class Bcash_Pagamento_Block_Info_Creditcard
  */
-class Bcash_Pagamento_Block_Info_Payment extends Mage_Payment_Block_Info
+class Bcash_Pagamento_Block_Info_Creditcard extends Mage_Payment_Block_Info
 {
+    protected function _construct(){
+        parent::_construct();
+        $this->setTemplate('bcash/pagamento/info.phtml');
+    }
+
+    public function getInfoPayment(){
+
+        $order_id = $this->getInfo()->getOrder()->getIncrementId();
+        $info_payments = Mage::getModel('bcash/order')->getBcashInfoPayment($order_id);
+
+        return $info_payments;
+    }
 
 	/**
 	 * @param null $transport

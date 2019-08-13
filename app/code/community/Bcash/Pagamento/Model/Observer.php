@@ -17,7 +17,7 @@ class Bcash_Pagamento_Model_Observer
         if (($origOrderData['state'] !== $newOrderData['state']) && ($newOrderData['state'] == Mage_Sales_Model_Order::STATE_CANCELED)) {
             // Verifica se pedido possui transação Bcash relacionada
             $order = $observer->getOrder()->getData();
-            if(!empty($order['transaction_id_bcash']) && !is_null($order['transaction_id_bcash'])) {
+            if (!empty($order['transaction_id_bcash']) && !is_null($order['transaction_id_bcash'])) {
                 $orderId = $order['entity_id'];
                 $order = Mage::getModel('sales/order')->load($orderId);
                 $order->addStatusHistoryComment('Pedido não cancelado através do cancelamento Bcash. A transação ' . $order['transaction_id_bcash'] . ' não foi alterada.');
@@ -41,17 +41,16 @@ class Bcash_Pagamento_Model_Observer
         // @var $quote Mage_Sales_Model_Quote
         $quote = $event->getQuote();
 
-
         $quoteId = $quote->getId();
         $orderId = $order->getId();
         $incrId = $order->getIncrementId();
 
         // Sync datas
-        Mage::helper('pagamento')->updateOrderSyncBcashDataWithQuote($orderId, $quoteId);
+        Mage::helper('bcash')->updateOrderSyncBcashDataWithQuote($orderId, $quoteId);
 
         // Session values
         $session = Mage::getSingleton('checkout/session');
-        Mage::log("Saving quote  [$quoteId] and order [$incrId] to checkout/session");
+        Mage::helper("bcash")->saveLog("Saving quote  [$quoteId] and order [$incrId] to checkout/session");
         $session->setData('OrderIdBcash', $orderId);
         $session->setData('OrderIncrementIdBcash', $incrId);
         $session->setData('QuoteIdBcash', $quoteId);
@@ -68,7 +67,6 @@ class Bcash_Pagamento_Model_Observer
      */
     public function orderSuccessEvent($observer)
     {
-        Mage::log("Bcash_Pagamento_Model_Observer::showPaymentLink");
         try {
             $order = new Mage_Sales_Model_Order();
             $lastOrderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
@@ -85,14 +83,16 @@ class Bcash_Pagamento_Model_Observer
             $block = $layout->createBlock(
                 'Mage_Core_Block_Template',
                 'link_pagamento_bcash',
-                array('template' => 'pagamento/checkout/success.phtml')
+                array('template' => 'bcash/pagamento/checkout/success.phtml')
             );
             $block->setOrder($order);
             $block->setQuote($quote);
             $block->setType($type);
             $layout->getBlock('content')->append($block);
-        } catch(Exception $e) {
-            Mage::log($e->getMessage());
+
+            Mage::helper("bcash")->saveLog("Pedido realizado com sucesso.");
+        } catch (Exception $e) {
+            Mage::helper("bcash")->saveLog($e->getMessage());
         }
     }
 
@@ -102,49 +102,10 @@ class Bcash_Pagamento_Model_Observer
             if (!is_null($observer->getQuote())) {
                 $params = Mage::app()->getFrontController()->getRequest()->getParams();
                 $params['installments_bcash'] = isset($params['installments_bcash']) ? $params['installments_bcash'] : 1;
-
-                //Adiciona Desconto ao Pedido caso 1x Credito, Boleto ou TEF (configurados no Backend)
-                $discountAmount = 0;
-                if ($params['installments_bcash'] == 1) {
-                    $transaction = new Bcash_Pagamento_Helper_Transaction();
-                    $discountAmount = $transaction->calculateDiscount($params['payment-method']);
-                }
-
-                $quote = $observer->getQuote();
-                $quote->collectTotals();
-
-                if($discountAmount > 0) {
-                    $grandTotal = $quote->getGrandTotal();
-                    $subTotalWithDiscount = $quote->getSubtotalWithDiscount();
-                    $baseGrandTotal = $quote->getBaseGrandTotal();
-                    $baseSubTotalWithDiscount = $quote->getBaseSubtotalWithDiscount();
-
-                    // Outros descontos aplicados
-                    $objDiscountAmount = $quote->getDiscountAmount();
-                    if ($objDiscountAmount <> 0) {
-                        $discountAmount = (-1 * ((-$discountAmount) + $objDiscountAmount));
-                        $grandTotal = $grandTotal + (-1 * $objDiscountAmount);
-                        $subTotalWithDiscount = $subTotalWithDiscount + (-1 * $objDiscountAmount);
-                        $baseGrandTotal = $baseGrandTotal + (-1 * $objDiscountAmount);
-                        $baseSubTotalWithDiscount = $baseSubTotalWithDiscount + (-1 * $objDiscountAmount);
-                    }
-
-                    $totalDiscountAmount = $discountAmount;
-                    $subtotalWithDiscount = $subTotalWithDiscount - $discountAmount;
-                    $baseTotalDiscountAmount = $discountAmount;
-                    $baseSubtotalWithDiscount = $baseSubTotalWithDiscount - $discountAmount;
-
-                    $quote->setDiscountAmount(-$totalDiscountAmount);
-                    $quote->setSubtotalWithDiscount($subtotalWithDiscount);
-                    $quote->setBaseDiscountAmount($baseTotalDiscountAmount);
-                    $quote->setBaseSubtotalWithDiscount($baseSubtotalWithDiscount);
-                    $quote->setGrandTotal($grandTotal - $totalDiscountAmount);
-                    $quote->setBaseGrandTotal($baseGrandTotal - $baseTotalDiscountAmount);
-                    $quote->setTotalsCollectedFlag(false)->collectTotals();
-                    $quote->save();
-                }
             }
-        } catch (Exception $e) { Mage::log($e->getMessage()); }
+        } catch (Exception $e) {
+            Mage::helper("bcash")->saveLog("Exception- Model_Observer->updateSalesQuotePayment: " . $e->getMessage());
+        }
     }
 
 }

@@ -1,0 +1,208 @@
+<?php
+$code = $this->getMethodCode();
+$paymentMethods = $this->getPaymentMethods();
+$size = count($paymentMethods);
+?>
+<div id="payment-<?php echo $code; ?>">
+    <link rel="stylesheet" href="<?php echo $this->getSkinUrl('bcash/pagamento/css/application.css') ?>?v=<?php echo rand();?>" type="text/css"/>
+    <div class="form-list" id="payment_form_<?php echo $code; ?>" style="display:none;">
+        <div class="payment-group" >
+            <div class="b-row" style="padding-left:15px; margin-bottom:10px">
+                <?php if($this->getCpf()) : ?>
+                    <div class="" style="float:left; width:40%; margin:2px">
+                        <label>CPF/CNPJ do titular</label>
+                        <input type="text" class="b-form-control validate-cpf-cnpj-bankslip" id="cpf_cnpj_<?php echo $code; ?>"
+                               name="cpf_cnpj_<?php echo $code; ?>" value=""
+                               maxlength="18" autocomplete="off"/>
+                    </div>
+                <?php endif; ?>
+                <?php if($this->getPhone()) : ?>
+                    <div class="" style="float:left; width:53%; margin:3px; margin-left:10px">
+                        <label>Telefone do titular</label><br />
+                        <div style="width: 53px; float: left;">
+                            <input type="text" class="b-form-control validate-ddd-bankslip" maxlength="2" value=""
+                                   name="ddd_<?php echo $code; ?>"
+                                   id="ddd_<?php echo $code; ?>">
+                        </div>
+                        <div style="width: 123px; float: left; margin-left:3px">
+                            <input type="text" class="b-form-control validate-phone-bankslip" maxlength="9" value=""
+                                   name="phone_<?php echo $code; ?>"
+                                   id="phone_<?php echo $code; ?>">
+                        </div>
+
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-bcash-group-<?php echo $code; ?>">
+        <?php
+        if($size > 0) {
+            foreach ($paymentMethods as $paymentType => $payments) { ?>
+                <?php
+                $totalPayments = count($payments);
+                if ($totalPayments > 0) {
+                    ?>
+                    <div class="payment-group">
+                        <div>
+                            <ul>
+                                <?php foreach ($payments as $payment) { ?>
+                                    <li>
+                                        <input type="radio"
+                                               class="payment-method-bcash-<?php echo $code; ?> validate-one-required-by-name"
+                                               id="payment-method-<?php echo $payment->id ?>" name="bcash-payment-method"
+                                               value="<?php echo $payment->id ?>" class/>
+                                        <label class="bandeira bandeira-<?php echo $code; ?> band-<?php echo $payment->id ?>"
+                                               for="payment-method-<?php echo $payment->id ?>"></label>
+                                    </li>
+                                <?php } ?>
+                            </ul>
+                        </div>
+                        <?php if ($size > 1) { ?>
+                            <hr>
+                        <?php } ?>
+                    </div>
+                    <?php
+                }  ?>
+                <!-- payment-group -->
+                <?php
+                $size--;
+            }
+        }else {
+            echo "Meio de pagamento indispon&iacute;vel no momento. Verifique suas credenciais e tente novamente.";
+        }?>
+    </div>
+</div>
+<!-- div b-col-xs-4 -->
+<script type="text/javascript">
+    //<![CDATA[
+    var requestUrl = '<?php echo Mage::getUrl('bcash/payment/dados',array('_secure'=>true)) ?>';
+
+    function in_array(needle, haystack, argStrict) {
+        var key = '',
+            strict = !!argStrict;
+        if (strict) {
+            for (key in haystack) {
+                if (haystack[key] === needle) {
+                    return true;
+                }
+            }
+        } else {
+            for (key in haystack) {
+                if (haystack[key] == needle) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    var initBcashBankslipPagamento = function () {
+
+        function showBcashBankslipPaymentMethod() {
+            var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group-<?php echo $code; ?>');
+
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash-<?php echo $code; ?>");
+            for (var i = paymentRadios.length - 1; i >= 0; i--) {
+                if (!hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
+                    paymentRadios[i].className = paymentRadios[i].className + " validate-one-required-by-name";
+                }
+
+                //Caso houver somente 1 item, carregar selecionado
+                if(paymentRadios.length == 1) {
+                    paymentRadios[i].disabled = false;
+                    paymentRadios[i].checked = true;
+
+                    var option = paymentRadios[i].value;
+                    var typePayment = 'boleto';
+                    new Ajax.Request(requestUrl, {
+                        method: 'POST',
+                        parameters: 'input=' + typePayment + '&tipo=' + option
+                    });
+                }else {
+                    paymentRadios[i].disabled = true;
+                }
+            }
+            if (hasClass(paymentBcashConteiner, 'b-hide')) {
+                paymentBcashConteiner.className = paymentBcashConteiner.className.replace(/\bb-hide\b/, '');
+            }
+            if (hasClass(paymentConteiner, 'b-hide')) {
+                paymentConteiner.className = paymentConteiner.className.replace(/\bb-hide\b/, '');
+            }
+        }
+
+        function hideBcashBankslipPaymentMethod() {
+            var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group-<?php echo $code; ?>');
+
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash-<?php echo $code; ?>");
+            for (var i = paymentRadios.length - 1; i >= 0; i--) {
+                if (hasClass(paymentRadios[i], 'validate-one-required-by-name')) {
+                    paymentRadios[i].className = paymentRadios[i].className.replace(/\bvalidate-one-required-by-name\b/, '');
+                }
+                paymentRadios[i].disabled = true;
+            }
+
+            // all
+            if (!hasClass(paymentBcashConteiner, 'b-hide')) {
+                paymentBcashConteiner.className = paymentBcashConteiner.className + " b-hide";
+            }
+            if (!hasClass(paymentConteiner, 'b-hide')) {
+                paymentConteiner.className = paymentConteiner.className + " b-hide";
+            }
+        }
+
+        function clickFlagBankslip(e) {
+            var elem, evt = e ? e : event;
+            if (evt.srcElement) {
+                elem = evt.srcElement;
+            } else if (evt.target) {
+                elem = evt.target;
+            }
+
+            var paymentMethodBcash = elem.attributes['for'].value;
+            var paymentRadio = document.getElementById(paymentMethodBcash);
+            document.getElementById(paymentMethodBcash).disabled = false;
+            document.getElementById(paymentMethodBcash).checked = true;
+
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'input=boleto&tipo=' + paymentRadio.value
+            });
+
+            document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
+                if (e.value == '<?php echo $code; ?>') {
+                    e.checked = true;
+                }
+            });
+        }
+
+        var paymentsOptions = document.getElementsByClassName("bandeira-<?php echo $code; ?>");
+        for (var i = paymentsOptions.length - 1; i >= 0; i--) {
+            var paymentFlags = paymentsOptions[i];
+            paymentFlags.onclick = clickFlagBankslip;
+        }
+
+        $(document).on('change', 'input[type=radio][name=payment[method]]', function (event) {
+            var target = event.target;
+            var paymentConteiner = document.getElementById('payment-<?php echo $code; ?>');
+            var paymentBcashConteiner = document.getElementById('payment-bcash-group-<?php echo $code; ?>');
+            if (target.id == 'p_method_<?php echo $code; ?>') {
+                showBcashBankslipPaymentMethod();
+            } else {
+
+                hideBcashBankslipPaymentMethod();
+            }
+            event.preventDefault();
+        });
+
+        function hasClass(element, cls) {
+            return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+        }
+
+    };
+    initBcashBankslipPagamento();
+    //]]>
+</script>

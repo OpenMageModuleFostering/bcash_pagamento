@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "GNU-General-Public-License-(GPL)",
     "homepage": "",
-    "description": "Módulo para Magento Bcash Transparente (API)",
+    "description": "Bcash Magento Transparente (API)",
     "authors": [
     {
         "name": "Bcash",

@@ -1,8 +1,8 @@
 <?php
 
-require_once(Mage::getBaseDir("lib") . "/BcashApi/autoloader.php");
+require_once(Mage::getBaseDir("lib") . "/Bcash/AutoLoader.php");
+Bcash\AutoLoader::register();
 
-use Bcash_Pagamento_Helper_RegisterSdk;
 use Bcash\Service\Cancellation;
 use Bcash\Exception\ValidationException;
 use Bcash\Exception\ConnectionException;
@@ -12,18 +12,15 @@ use Bcash\Exception\ConnectionException;
  */
 class Bcash_Pagamento_Model_Order extends Mage_Core_Model_Abstract
 {
-
     private $email;
     private $token;
-    private $obj;
     private $sandbox;
 
     public function __construct()
     {
-        $this->obj = Mage::getSingleton('Bcash_Pagamento_Model_PaymentMethod');
-        $this->email = $this->obj->getConfigData('email');
-        $this->token = $this->obj->getConfigData('token');
-        $this->sandbox = $this->obj->getConfigData('sandbox');
+        $this->email = Mage::getStoreConfig('payment/bcash/email');
+        $this->token = Mage::getStoreConfig('payment/bcash/token');
+        $this->sandbox = Mage::getStoreConfig('payment/bcash/sandbox');
     }
 
     /**
@@ -46,14 +43,31 @@ class Bcash_Pagamento_Model_Order extends Mage_Core_Model_Abstract
             }
         } catch (ValidationException $e) {
             Mage::getSingleton('adminhtml/session')->addError('Erro: ' . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("ValidationException - Model_Order->cancellation: " . $e->getMessage(), $e->getErrors());
 
         } catch (ConnectionException $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage() . ' (Confirme se o serviço de cancelamento está habilitado para sua conta Bcash)');
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("ConnectionException - Model_Order->cancellation: " . $e->getMessage(), $e->getErrors());
         }
 
         return $response;
+    }
+
+    public function getBcashInfoPayment($order_id){
+        $order = Mage::getModel('sales/order')->loadByIncrementId($order_id);
+        $quoteId = $order->getQuoteId();
+        $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+
+        $info_payments = array(
+            array("titulo" => "method_payment", "valor" => $quote->getPaymentMethodBcash()),
+            array("titulo" => "Id transação Bcash", "valor" => $quote->getTransactionIdBcash()),
+            array("titulo" => "Cod. do Status", "valor" => $quote->getStatusBcash()),
+            array("titulo" => "Descrição do Status", "valor" =>  $quote->getDescriptionStatusBcash()),
+            array("titulo" => "Link", "valor" => $quote->getPaymentLinkBcash()),
+            array("titulo" => "Parcelas", "valor" => $quote->getInstallmentsBcash() . "x")
+        );
+
+        return $info_payments;
     }
 
 }

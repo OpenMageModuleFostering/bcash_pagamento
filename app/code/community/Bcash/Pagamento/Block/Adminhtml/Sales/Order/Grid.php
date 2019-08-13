@@ -12,7 +12,7 @@ class Bcash_Pagamento_Block_Adminhtml_Sales_Order_Grid extends Mage_Adminhtml_Bl
         if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/cancel')) {
             $this->getMassactionBlock()->addItem('cancel_order_with_bcash', array(
                 'label' => $this->__('Cancelar com Bcash'),
-                'url' => $this->getUrl('pagamento/admin_sales_order/masscanceltransaction/')
+                'url' => $this->getUrl('bcash/admin_sales_order/masscanceltransaction/')
             ));
         }
     }

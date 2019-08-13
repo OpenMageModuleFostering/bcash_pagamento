@@ -1,6 +1,7 @@
 <?php
 
-require_once(Mage::getBaseDir("lib") . "/BcashApi/autoloader.php");
+require_once(Mage::getBaseDir("lib") . "/Bcash/AutoLoader.php");
+Bcash\AutoLoader::register();
 
 use Bcash\Domain\NotificationStatusEnum;
 
@@ -20,7 +21,7 @@ class Bcash_Pagamento_Block_Adminhtml_Sales_Order_View extends Mage_Adminhtml_Bl
         $quoteId = $order->getQuoteId();
         $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
         $transactionIdBcash = $quote->getTransactionIdBcash();
-        $transactionInfo = Mage::helper('pagamento')->getTransaction($transactionIdBcash);
+        $transactionInfo = Mage::helper('bcash')->getTransaction($transactionIdBcash);
 
         // Checa se o status da transaçao Bcash permite cancelamento
         if($transactionInfo->transacao->cod_status == NotificationStatusEnum::IN_PROGRESS || $transactionInfo->transacao->cod_status == NotificationStatusEnum::APPROVED) {
@@ -30,7 +31,7 @@ class Bcash_Pagamento_Block_Adminhtml_Sales_Order_View extends Mage_Adminhtml_Bl
                 );
                 $this->_addButton('button_cancel_with_bcash', array(
                     'label' => 'Cancelar com Bcash',
-                    'onclick' => 'deleteConfirm(\'' . $confirmationMessage . '\', \'' . $this->getUrl('pagamento/admin_sales_order/canceltransaction/') . '\')',
+                    'onclick' => 'deleteConfirm(\'' . $confirmationMessage . '\', \'' . $this->getUrl('bcash/admin_sales_order/canceltransaction/') . '\')',
                 ), 0, 100, 'header', 'header');
             }
         }

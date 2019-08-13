@@ -1,6 +1,7 @@
 <?php
 
-require_once(Mage::getBaseDir("lib") . "/BcashApi/autoloader.php");
+require_once(Mage::getBaseDir("lib") . "/Bcash/AutoLoader.php");
+Bcash\AutoLoader::register();
 
 use Bcash\Service\Installments;
 use Bcash\Exception\ValidationException;
@@ -8,16 +9,14 @@ use Bcash\Exception\ConnectionException;
 use Bcash\Domain\PaymentMethodEnum;
 
 /**
- * Class Bcash_Pagamento_Block_Form_Payment
+ * Class Bcash_Pagamento_Block_Form_Creditcard
  */
-class Bcash_Pagamento_Block_Form_Payment extends Mage_Payment_Block_Form
+class Bcash_Pagamento_Block_Form_Creditcard extends Mage_Payment_Block_Form
 {
-    protected $_code = 'pagamento';
-
     /**
-     * @var Mage_Core_Model_Abstract
+     * @var string
      */
-    private $obj;
+    protected $_code = 'bcash_creditcard';
     /**
      * @var
      */
@@ -70,15 +69,14 @@ class Bcash_Pagamento_Block_Form_Payment extends Mage_Payment_Block_Form
     public function __construct()
     {
         parent::__construct();
-        $this->setTemplate('pagamento/form/payment.phtml');
-        $this->obj = Mage::getSingleton('Bcash_Pagamento_Model_PaymentMethod');
-        $this->email   = $this->obj->getConfigData('email');
-        $this->token   = $this->obj->getConfigData('token');
-        $this->sandbox = $this->obj->getConfigData('sandbox');
-        $this->max_installments = $this->obj->getConfigData('max_installments');
-        $this->cpf = $this->obj->getConfigData('cpf');
-        $this->phone = $this->obj->getConfigData('phone');
-        $this->desconto_credito_1x = $this->obj->getConfigData('desconto_credito_1x');
+        $this->setTemplate('bcash/pagamento/form/creditcard.phtml');
+        $this->email   = Mage::getStoreConfig('payment/bcash/email');
+        $this->token   = Mage::getStoreConfig('payment/bcash/token');
+        $this->sandbox = Mage::getStoreConfig('payment/bcash/sandbox');
+        $this->max_installments = Mage::getStoreConfig('payment/bcash_creditcard/max_installments');
+        $this->cpf = Mage::getStoreConfig('payment/bcash/cpf');
+        $this->phone = Mage::getStoreConfig('payment/bcash/phone');
+        $this->desconto_credito_1x = 0;
         $this->cards  = array(PaymentMethodEnum::VISA, PaymentMethodEnum::MASTERCARD, PaymentMethodEnum::AMERICAN_EXPRESS, PaymentMethodEnum::AURA, PaymentMethodEnum::DINERS, PaymentMethodEnum::HIPERCARD, PaymentMethodEnum::ELO);
         $this->boleto = PaymentMethodEnum::BANK_SLIP;
         $this->tefs   = array(PaymentMethodEnum::BB_ONLINE_TRANSFER, PaymentMethodEnum::BRADESCO_ONLINE_TRANSFER, PaymentMethodEnum::ITAU_ONLINE_TRANSFER, PaymentMethodEnum::BANRISUL_ONLINE_TRANSFER, PaymentMethodEnum::HSBC_ONLINE_TRANSFER);
@@ -100,11 +98,11 @@ class Bcash_Pagamento_Block_Form_Payment extends Mage_Payment_Block_Form
      */
     public function getPaymentMethods()
     {
-        Mage::log("Bcash_Pagamento_Block_Form_Payment called getPaymentMethods");
+        //Mage::helper("bcash")->saveLog("Bcash_Pagamento_Block_Form_Creditcard called getPaymentMethods OK");
         // Find allowed payment methods
         $listAllowed = $this->getAllowedPaymentMethods();
 
-        return Mage::helper('pagamento/paymentMethod')->getPaymentMethods($listAllowed);
+        return Mage::helper('bcash/paymentMethod')->getPaymentMethods($listAllowed, "creditcard");
     }
 
     /**
@@ -126,12 +124,10 @@ class Bcash_Pagamento_Block_Form_Payment extends Mage_Payment_Block_Form
             $response = $installments->calculate($grandTotal, $this->max_installments, $ignoreScheduledDiscount);
             return array("ok" => true, "installments" => array(0 => $this->prepareInstallmentsCards($response)));
         } catch (ValidationException $e) {
-            Mage::log("Erro Bcash ValidationException:" . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("ValidationException - Form_Creditcard::getInstallments:" . $e->getMessage(), $e->getErrors());
             return array("ok" => false, "installments" => array("1" => $grandTotal));
         } catch (ConnectionException $e) {
-            Mage::log("Erro Bcash ConnectionException:" . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("ConnectionException - Form_Creditcard::getInstallments:" . $e->getMessage(), $e->getErrors());
             return array("ok" => false, "installments" => array("1" => $grandTotal));
         }
     }
@@ -172,23 +168,20 @@ class Bcash_Pagamento_Block_Form_Payment extends Mage_Payment_Block_Form
             $response = $installments->calculate(100.00, 1, false);
             // list methods
             foreach($response->paymentTypes as $types) {
-                foreach($types->paymentMethods as $method) {
-                    $methods[] = $method->id;
+                if($types->name == 'card') {
+                    foreach($types->paymentMethods as $method) {
+                        $methods[] = $method->id;
+                    }
                 }
             }
         } catch (ValidationException $e) {
-            Mage::log("Erro Bcash ValidationException:" . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("ValidationException - Form_Creditcard::getAllowedPaymentMethods:" . $e->getMessage(), $e->getErrors());
         } catch (ConnectionException $e) {
-            Mage::log("Erro Bcash ConnectionException:" . $e->getMessage());
-            Mage::log($e->getErrors());
+            Mage::helper("bcash")->saveLog("ConnectionException - Form_Creditcard::getAllowedPaymentMethods:" . $e->getMessage(), $e->getErrors());
         }
 
         return $methods;
     }
-
-
-
 }
 
 

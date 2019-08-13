@@ -12,7 +12,7 @@ class Bcash_Pagamento_PaymentController extends Mage_Core_Controller_Front_Actio
     public function redirectAction()
     {
         $this->loadLayout();
-        $block = $this->getLayout()->createBlock('Mage_Core_Block_Template', 'paymentmethod', array('template' => 'pagamento/redirect.phtml'));
+        $block = $this->getLayout()->createBlock('Mage_Core_Block_Template', 'paymentmethod', array('template' => 'bcash/pagamento/redirect.phtml'));
         $this->getLayout()->getBlock('content')->append($block);
         $this->renderLayout();
     }
@@ -110,7 +110,7 @@ class Bcash_Pagamento_PaymentController extends Mage_Core_Controller_Front_Actio
         $block = $this->getLayout()->createBlock(
             'Mage_Core_Block_Template',
             'link_pagamento_bcash',
-            array('template' => 'pagamento/checkout/success.phtml')
+            array('template' => 'bcash/pagamento/checkout/success.phtml')
         );
 
         $block->setOrder($order);
@@ -132,7 +132,7 @@ class Bcash_Pagamento_PaymentController extends Mage_Core_Controller_Front_Actio
     {
         $method = Mage::app()->getRequest()->getPost('method');
 
-        $paymentInstallments = Mage::helper('pagamento')->getInstallments();
+        $paymentInstallments = Mage::helper('bcash')->getInstallments();
         $response =  "[{ccId : 0, ccName : '', ccNumber : '', ccDescript : '(Selecione o número de parcelas)'}";
         $okInstallments = $paymentInstallments['ok'];
         if($okInstallments):
