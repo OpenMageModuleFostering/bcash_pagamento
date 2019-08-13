@@ -1,0 +1,815 @@
+<!-- <h1>Bcash</h1> -->
+<link rel="stylesheet" href="<?php echo $this->getSkinUrl('bcash/pagamento/css/application.css') ?>" type="text/css"/>
+<!-- Script Start -->
+<!--<script type="text/javascript" src="<?php echo $this->getSkinUrl('bcash/pagamento/js/payment.js'); ?>"></script>//-->
+<!-- Script End -->
+<?php
+$code = $this->getCode();
+$paymentMethods = $this->getPaymentMethods();
+$paymentInstallments = $this->getInstallments();
+$size = count($paymentMethods);
+$paymentGroupName = array(
+    'CARD' => "Cartão de cr&eacute;dito",
+    'BANKSLIP' => "Boleto Banc&aacute;rio",
+    'ONLINE_TRANSFER' => "Transfer&ecirc;ncia Banc&aacute;ria"
+);
+?>
+<div id="payment-<?php echo $code; ?>">
+
+    <div class="form-list" id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;">
+        <div class="payment-group" >
+
+            <div class="b-row" style="padding-left:15px; margin-bottom:10px">
+                <?php if($this->getCpf()) : ?>
+                    <div class="" style="float:left; width:40%; margin:2px">
+                        <label>CPF/CNPJ do titular</label>
+                        <input type="text" class="b-form-control validate-cpf-cnpj" id="cpf_cnpj_bcash"
+                               name="cpf_cnpj_bcash" value=""
+                               maxlength="18" autocomplete="off"/>
+                    </div>
+                <?php endif; ?>
+                <?php if($this->getPhone()) : ?>
+                    <div class="" style="float:left; width:53%; margin:3px; margin-left:10px">
+                        <label>Telefone do titular</label><br />
+
+                        <div style="width: 53px; float: left;">
+                            <input type="text" class="b-form-control validate-ddd" maxlength="2" value=""
+                                   name="ddd_bcash"
+                                   id="ddd_bcash">
+                        </div>
+                        <div style="width: 123px; float: left; margin-left:3px">
+                            <input type="text" class="b-form-control validate-phone" maxlength="9" value=""
+                                   name="phone_bcash"
+                                   id="phone_bcash">
+                        </div>
+
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <?php foreach ($paymentMethods as $paymentType => $payments): ?>
+        <?php
+            $totalPayments = count($payments);
+            if($totalPayments > 0):
+        ?>
+            <div class="payment-group">
+                <div>
+                    <h3><?php echo $paymentGroupName[$paymentType] ?></h3>
+                    <ul>
+                        <?php foreach ($payments as $payment): ?>
+                            <li>
+                                <input type="radio" class="payment-method-bcash validate-one-required-by-name"
+                                       id="payment-method-<?php echo $payment->id ?>" name="payment-method"
+                                       value="<?php echo $payment->id ?>" class/>
+                                <label class="bandeira band-<?php echo $payment->id ?>"
+                                       for="payment-method-<?php echo $payment->id ?>"></label>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+                <?php if ($paymentType == 'CARD'): ?>
+
+                    <div id="card-conteiner" class="b-form-group b-hide">
+                        <div class="b-n-row">
+                            <div class="b-form-group b-col-xs-8">
+                                <label>N&uacute;mero do cart&atilde;o</label>
+                                <input type="text" class="b-form-control validate-number-card" maxlength="20" value=""
+                                       id="card_number_bcash"
+                                       name="card_number_bcash"
+                                       autocomplete="off" style="width:100%">
+                            </div>
+                            <div class="b-form-group b-col-xs-4" style="padding:0px">
+                                <div>
+                                    <label>CVV <span class="icon-tooltip" data-tooltip="Código de segurança do cartão de crédito.">?</span></label>
+                                    <input type="text" class="b-form-control validate-ccv-card" maxlength="3" value=""
+                                           name="cvv_bcash"
+                                           id="cvv_bcash">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="b-n-row">
+                            <div class="b-form-group b-col-xs-5" style="padding-right:0px">
+                                <label class="">Validade</label>
+
+                                <div class="b-form-group">
+                                    <div class="b-col-xs-5" style="padding:0px">
+                                        <select class="b-form-control validate-month-bcash" id="month_bcash"
+                                                name="month_bcash" style="padding: 2px;">
+                                            <option value=""></option>
+                                            <?php
+                                            for ($i = 1; $i < 13; $i++) :
+                                                $month = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                                ?>
+                                                <option value="<?php echo $month ?>"><?php echo $month ?></option>
+                                                <?php
+                                            endfor;
+                                            ?>
+                                        </select>
+                                    </div>
+                                    <div class="b-col-xs-7" style="padding:0px; padding-left:4px">
+                                        <select class="b-form-control validate-year-bcash" id="year_bcash"
+                                                name="year_bcash" style="padding: 2px;">
+                                            <option value=""></option>
+                                            <?php
+                                            $year = date("Y");
+                                            $endYear = $year + 10;
+                                            for ($i = $year; $i < $endYear; $i++) :
+                                                $month = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                                ?>
+                                                <option value="<?php echo $month ?>"><?php echo $month ?></option>
+                                                <?php
+                                            endfor;
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="b-form-group b-col-xs-7" style="padding-right:0px">
+                                <label>Parcelas</label>
+                                <select class="b-form-control validate-installments-bcash" name="installments_bcash" id="installments_bcash" style="max-width:100% !important">
+                                    <option value="" disabled> (Selecione o número de parcelas) </option>
+                                    <?php
+                                    $okInstallments = $paymentInstallments['ok'];
+                                    $installments = $paymentInstallments["installments"];
+                                    if (!$okInstallments) :
+                                        foreach ($installments as $times => $value) :
+                                            ?>
+                                            <option value="<?php echo $times ?>"><?php echo $times ?>x - R$ <?php echo number_format($value,2,',','.')?></option>
+                                            <?php
+                                        endforeach;
+                                    endif;
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div  class="b-n-row">
+                            <div class="b-form-group" style="padding-left:17px">
+                                <label>Nome titular</label>
+                                <input type="text" class="b-form-control validate-name-card" value="" name="name_card_bcash"
+                                       id="name_card_bcash" maxlength="100"
+                                       autocomplete="off" style="width:100%">
+                            </div>
+                        </div>
+
+                        <div class="b-row">
+
+                        </div>
+
+
+                    </div> <!-- card-conteiner -->
+
+                <?php endif; ?>
+
+                <?php if ($size > 1): ?>
+                    <hr>
+                <?php endif ?>
+            </div>
+        <?php endif; ?>
+        <!-- payment-group -->
+        <?php
+        $size--;
+    endforeach; ?>
+</div>
+<!-- div b-col-xs-4 -->
+<script type="text/javascript">
+    //<![CDATA[
+    var requestUrl = '<?php echo Mage::getUrl('pagamento/payment/dados') ?>';
+
+    function in_array(needle, haystack, argStrict) {
+        var key = '',
+            strict = !!argStrict;
+        if (strict) {
+            for (key in haystack) {
+                if (haystack[key] === needle) {
+                    return true;
+                }
+            }
+        } else {
+            for (key in haystack) {
+                if (haystack[key] == needle) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /*Bandeiras*/
+    var visa = 1;
+    var master = 2;
+    var american_express = 37;
+    var aura = 45;
+    var dinners = 55;
+    var hipercard = 56;
+    var elo = 63;
+    var cards = [visa, master, american_express, aura, dinners, hipercard, elo];
+    var boleto = 10;
+    var banco_brasil = 58;
+    var banco_bradesco = 59;
+    var banco_itau = 60;
+    var banco_banrisul = 61;
+    var banco_hsbc = 62;
+    var tefs = [banco_brasil, banco_bradesco, banco_itau, banco_banrisul, banco_hsbc];
+
+    /*
+     * Parcelamentos
+     */
+    <?php
+    echo "var installments_cc = [{ccId : 0, ccName : '', ccNumber : '', ccDescript : '(Selecione o número de parcelas)'}";
+    $okInstallments = $paymentInstallments['ok'];
+    if($okInstallments):
+        $installments = $paymentInstallments["installments"][0]->paymentTypes;
+        foreach ($installments as $type) :
+            if ($type->name == 'card') :
+                foreach ($type->paymentMethods as $typePayment) :
+                    foreach ($typePayment->installments as $paymentInstallment) :
+                    echo ",{ccId : " . $typePayment->id . ", ccName : '" . $typePayment->name . "', ccNumber : " . $paymentInstallment->number . ",
+                            ccDescript : '" . $paymentInstallment->number . "x - R$ " . number_format($paymentInstallment->installmentAmount,2,',','.') .
+                            ($paymentInstallment->rate ? ' ('. number_format($paymentInstallment->rate,2,',','.') . '%)' : '') . (isset($paymentInstallment->installmentAmountDesc) ? $paymentInstallment->installmentAmountDesc : '') . "'}";
+                    endforeach;
+                endforeach;
+            endif;
+        endforeach;
+    endif;
+    echo "];";
+?>
+
+    var initBcashPagamento = function () {
+        checkPaymentOnLoad();
+
+        function showInstallmentsOnlyForMethod(method)
+        {
+            if (in_array(method, cards)) {
+                var select_id = 'installments_bcash';
+                var select =  document.getElementById(select_id);
+
+                if(installments_cc.length > 1) {
+                    // Remove options
+                    var i; for(i=select.options.length-1; i>=0; i--) { select.remove(i); }
+
+                    // Add options
+                    var option = '';
+                    for (i=0; i < installments_cc.length; i++) {
+                        if(installments_cc[i].ccId == 0) {
+                            option = document.createElement("option");
+                            option.text = installments_cc[i].ccDescript;
+                            option.value = '';
+                            option.disabled = 'disabled';
+                            select.add(option);
+                            option = '';
+                        }
+                        if(installments_cc[i].ccId == method) {
+                            option = document.createElement("option");
+                            option.text = installments_cc[i].ccDescript;
+                            option.value = installments_cc[i].ccNumber;
+                            select.add(option);
+                            option = '';
+                        }
+                    }
+                    document.getElementById(select_id).value = "";
+                }
+            }
+        }
+
+        function ableCvv(card) {
+            cvvInput = document.getElementById("cvv_bcash");
+            cvvInput.value = '';
+            // Amex
+            if(card == american_express) {
+                cvvInput.maxLength = 4;
+            }else {
+                cvvInput.maxLength = 3;
+            }
+
+            if(cvvInput.hasClassName("validation-passed")) {
+                cvvInput.removeClassName("validation-passed");
+            }
+
+            // CVV não obrigatório
+            if(card == aura) {
+                if(cvvInput.hasClassName("validate-ccv-card")) {
+                    cvvInput.removeClassName("validate-ccv-card");
+                }
+            }else {
+                if(!cvvInput.hasClassName("validate-ccv-card")) {
+                    cvvInput.addClassName("validate-ccv-card");
+                }
+            }
+        }
+
+        function forceReloadOrderReviewOsc() {
+            if (typeof(OSCPayment) !== 'undefined') {                
+                OSCPayment.forcesavePayment();
+            }
+        }
+
+        function checkPaymentOnLoad() {
+            document.body.select('input[type=radio][name="payment[method]"]').each(function (e) {
+                if(e.value == 'pagamento') {
+                    e.checked = true;
+                    //force order review reload
+                    forceReloadOrderReviewOsc();
+                }
+            });
+        }
+
+        function checkIsCardSelected() {
+            var ElementPaymentMethod = [];
+            document.body.select('input[type=radio][name="payment-method"]:checked').each(function (element) {
+                if (element.checked) {
+                    ElementPaymentMethod = element;
+                }
+            });
+            var $isCard = isCard(ElementPaymentMethod);
+            return $isCard;
+        }
+
+        Validation.add('validate-cpf-cnpj', 'Documento inválido.', function (v) {
+            return isCpfCnpj(v);
+        });
+
+        Validation.add('validate-ddd', 'Preencha o ddd.', function (v) {
+            return v.length == 2;
+        });
+
+        Validation.add('validate-phone', 'Preencha o telefone.', function (v) {
+            return v.length == 8 || v.length == 9;
+        });
+
+        Validation.add('validate-name-card', 'Preencha o nome do titular.', function (v) {
+            var iscard = checkIsCardSelected();
+            if (iscard) {
+                return v.length > 0;
+            }
+            return true;
+        });
+
+        Validation.add('validate-number-card', 'Preencha o número do cartão corretamente.', function (v) {
+            var iscard = checkIsCardSelected();
+            if (iscard) {
+                if (v.length > 0) {
+                    return validateCardNumber();
+                }else {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        Validation.add('validate-ccv-card', 'Preencha o código de segurança.', function (v) {
+            var iscard = checkIsCardSelected();
+            if (iscard) {
+                return v.length > 0;
+            }
+            return true;
+        });
+
+        Validation.add('validate-year-bcash', 'Preencha o ano de validade do cartão.', function (v) {
+            var iscard = checkIsCardSelected();
+            if (iscard) {
+                return v.length > 0;
+            }
+            return true;
+        });
+
+        Validation.add('validate-installments-bcash', 'Selecione o número de parcelas.', function (v) {
+            var iscard = checkIsCardSelected();
+            if (iscard) {
+                return v.length > 0;
+            }
+            return true;
+        });
+
+        Validation.add('validate-month-bcash', 'Preencha o mês de vencimento do cartão.', function (v) {
+            var iscard = checkIsCardSelected();
+            if (iscard) {
+                return v.length > 0;
+            }
+            return true;
+        });
+
+        var cards = ['1', '2', '37', '45', '55', '56', '63'];
+
+        function clickFlag(e) {
+            var elem, evt = e ? e : event;
+            if (evt.srcElement) {
+                elem = evt.srcElement;
+            } else if (evt.target) {
+                elem = evt.target;
+            }
+
+            var paymentMethodBcash = elem.attributes['for'].value;
+            var paymentRadio = document.getElementById(paymentMethodBcash);
+            document.getElementById(paymentMethodBcash).disabled = true;
+            document.getElementById(paymentMethodBcash).checked = true;
+
+            var cardConteiner = document.getElementById('card-conteiner');
+            if (isCard(paymentRadio) && hasClass(cardConteiner, 'b-hide')) {
+                cardConteiner.className = cardConteiner.className.replace(/\bb-hide\b/, '');
+                enableCardForm();
+
+                new Ajax.Request(requestUrl, {
+                    method: 'POST',
+                    parameters: 'input=cartao&tipo=' + paymentRadio.value
+                });
+
+            } else if (!isCard(paymentRadio) && !hasClass(cardConteiner, 'b-hide')) {
+                cardConteiner.className = cardConteiner.className + " b-hide";
+                disableCardForm();
+
+                new Ajax.Request(requestUrl, {
+                    method: 'POST',
+                    parameters: 'input=boleto&tipo=' + paymentRadio.value
+                });
+            } else {
+                var option = paymentRadio.value;
+                var typePayment = 'boleto';
+                if (!in_array(option, cards)) {
+                    new Ajax.Request(requestUrl, {
+                        method: 'POST',
+                        parameters: 'input=' + typePayment + '&tipo=' + option
+                    });
+                } else {
+                    saveCardNumber();
+                }
+            }
+            disableUnunsed(paymentRadio);
+            showInstallmentsOnlyForMethod(paymentRadio.value);
+            ableCvv(paymentRadio.value);
+            checkPaymentOnLoad();
+        }
+
+        function enableCardForm() {
+            var formCardBcash = document.getElementsByClassName("b-form-control");
+            for (i in formCardBcash) {
+                formCardBcash[i].disabled = false;
+            }
+        }
+
+        function disableCardForm() {
+            var formCardBcash = document.getElementsByClassName("b-form-control");
+            for (i in formCardBcash) {
+                formCardBcash[i].disabled = true;
+            }
+        }
+
+        function disableUnunsed(paymentRadio) {
+            var paymentRadios = document.getElementsByClassName("payment-method-bcash");
+            for (var i = paymentRadios.length - 1; i >= 0; i--) {
+                paymentRadios[i].disabled = true;
+            }
+            ;
+            paymentRadio.disabled = false;
+        }
+
+        function isCard(element) {
+            //console.log(element);
+            return cards.indexOf(element.value) > -1;
+        }
+
+        function hasClass(element, cls) {
+            return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+        }
+
+        function mascaraCpfCnpj() {
+            var str = document.getElementById('cpf_cnpj_bcash');
+            var $value = str.value.replace(/\D/g, "");
+            /* Caso passe de 14 caracteres será formatado como CNPJ */
+            if ($value.length < 12)
+                str.value = cpf($value);
+            else if ($value.length >= 12 && $value.length < 15)
+                str.value = cnpj($value);
+            else
+                str.value = cnpj(cut($value));
+        }
+
+        function cut(str) {
+            return str.substring(0, 14);
+        }
+
+        /* Funcao de formatacao CPF */
+        function cpf(valor) {
+            /* Remove qualquer caracter digitado que não seja numero */
+            valor = valor.replace(/\D/g, "");
+            /* Adiciona um ponto entre o terceiro e o quarto digito */
+            valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+            /* Adiciona um ponto entre o terceiro e o quarto dígitos */
+            /* desta vez para o segundo bloco */
+            valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+            /* Adiciona um hifen entre o terceiro e o quarto dígitos */
+            valor = valor.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            return valor;
+        }
+
+        /* Funcao de formatacao CNPJ */
+        function cnpj(valor) {
+            /* Remove qualquer caracter digitado que não seja numero */
+            valor = valor.replace(/\D/g, "");
+            /* Adiciona um ponto entre o segundo e o terceiro dígitos */
+            valor = valor.replace(/^(\d{2})(\d)/, "$1.$2");
+            /* Adiciona um ponto entre o quinto e o sexto dígitos */
+            valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
+            /* Adiciona uma barra entre o oitavaloro e o nono dígitos */
+            valor = valor.replace(/\.(\d{3})(\d)/, ".$1/$2");
+            /* Adiciona um hífen depois do bloco de quatro dígitos */
+            valor = valor.replace(/(\d{4})(\d)/, "$1-$2");
+            return valor;
+        }
+
+        function onlyNumber(key) {
+            if (key == 8 || key == 46 || key == 37 || key == 39 || key == 9 || key == 35 || key == 36) {
+                return true;
+            }
+            else if ( key < 48 || key > 57 ) {
+                return false;
+            }
+            return true;
+        }
+
+        function unformatNumber(pNum) {
+            return String(pNum).replace(/\D/g, "").replace(/^0+/, "");
+        }
+
+        function isCpf(cpf) {
+            var soma;
+            var resto;
+            var i;
+            if ((cpf.length != 11) ||
+                (cpf == "00000000000") || (cpf == "11111111111") ||
+                (cpf == "22222222222") || (cpf == "33333333333") ||
+                (cpf == "44444444444") || (cpf == "55555555555") ||
+                (cpf == "66666666666") || (cpf == "77777777777") ||
+                (cpf == "88888888888") || (cpf == "99999999999")) {
+                return false;
+            }
+            soma = 0;
+            for (i = 1; i <= 9; i++) {
+                soma += Math.floor(cpf.charAt(i - 1)) * (11 - i);
+            }
+            resto = 11 - (soma - (Math.floor(soma / 11) * 11));
+            if ((resto == 10) || (resto == 11)) {
+                resto = 0;
+            }
+            if (resto != Math.floor(cpf.charAt(9))) {
+                return false;
+            }
+            soma = 0;
+            for (i = 1; i <= 10; i++) {
+                soma += cpf.charAt(i - 1) * (12 - i);
+            }
+            resto = 11 - (soma - (Math.floor(soma / 11) * 11));
+            if ((resto == 10) || (resto == 11)) {
+                resto = 0;
+            }
+            if (resto != Math.floor(cpf.charAt(10))) {
+                return false;
+            }
+            return true;
+        }
+
+        function isCnpj(s) {
+            var i;
+            var c = s.substr(0, 12);
+            var dv = s.substr(12, 2);
+            var d1 = 0;
+            for (i = 0; i < 12; i++) {
+                d1 += c.charAt(11 - i) * (2 + (i % 8));
+            }
+            if (d1 == 0) return false;
+            d1 = 11 - (d1 % 11);
+            if (d1 > 9) d1 = 0;
+            if (dv.charAt(0) != d1) {
+                return false;
+            }
+            d1 *= 2;
+            for (i = 0; i < 12; i++) {
+                d1 += c.charAt(11 - i) * (2 + ((i + 1) % 8));
+            }
+            d1 = 11 - (d1 % 11);
+            if (d1 > 9) d1 = 0;
+            if (dv.charAt(1) != d1) {
+                return false;
+            }
+            return true;
+        }
+
+        function isCpfCnpj(valor) {
+            var retorno = false;
+            var numero = valor;
+            numero = unformatNumber(numero);
+            if (numero.length > 11) {
+                if (isCnpj(numero)) {
+                    retorno = true;
+                }
+            } else {
+                if (isCpf(numero)) {
+                    retorno = true;
+                }
+            }
+            return retorno;
+        }
+
+        function validateNumber(event) {
+            var key = event.which || event.keyCode || event.charCode;
+            if (!onlyNumber(key)) {
+                return false;
+            }
+        }
+
+        var paymentsOptions = document.getElementsByClassName("bandeira");
+        for (var i = paymentsOptions.length - 1; i >= 0; i--) {
+            var paymentFlags = paymentsOptions[i];
+            paymentFlags.onclick = clickFlag;
+        }
+        <?php if($this->getCpf()) : ?>
+        document.getElementById("cpf_cnpj_bcash").onkeypress = function (event) {
+            var key = event.which || event.keyCode || event.charCode;
+            if (!onlyNumber(key)) {
+                return false;
+            }
+            mascaraCpfCnpj();
+        };
+
+        document.getElementById("cpf_cnpj_bcash").onblur = function (event) {
+            mascaraCpfCnpj();
+        };
+        <?php endif; ?>
+        <?php if($this->getPhone()) : ?>
+        document.getElementById("ddd_bcash").onkeypress = function (event) {
+            return validateNumber(event);
+        };
+
+        document.getElementById("phone_bcash").onkeypress = function (event) {
+            return validateNumber(event);
+        };
+        <?php endif; ?>
+        document.getElementById("card_number_bcash").onkeypress = function (event) {
+            return validateNumber(event);
+        };
+
+        function getCardSelected() {
+            var ElementPaymentMethod = [];
+            document.body.select('input[type=radio][name="payment-method"]:checked').each(function (element) {
+                if (element.checked) {
+                    ElementPaymentMethod = element;
+                }
+            });
+            var $isCard = isCard(ElementPaymentMethod);
+            // console.log($isCard);
+            return {'element': ElementPaymentMethod, 'isCard': $isCard};
+        }
+        <?php if($this->getCpf()) : ?>
+        $('cpf_cnpj_bcash').observe('blur', function (e) {
+            var RegExp = /^[0-9]{11,14}$/;
+            var cpf_cnpj_bcash = document.getElementById("cpf_cnpj_bcash");
+            var valor = cpf_cnpj_bcash.value.replace(/\D/g, "");
+            if (RegExp.test(valor) == false && valor.length > 0) {
+                alert('Informe corretamente seu CPF/CNPJ ');
+                cpf_cnpj_bcash.value = '';
+            }
+            else if (valor.length > 0) {
+                var id = document.getElementById("cpf_cnpj_bcash").value;
+                new Ajax.Request(requestUrl, {
+                    method: 'POST',
+                    parameters: 'pid=' + id + '&input=cpf'
+                });
+            }
+        });
+        <?php endif; ?>
+        function saveCardNumber() {
+            var id = document.getElementById("card_number_bcash").value;
+            var $elem = getCardSelected();
+            var tipo = $elem.element.value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=cartao&tipo=' + tipo
+            });
+        }
+
+        $('card_number_bcash').observe('blur', function (e) {
+            saveCardNumber();
+        });
+
+        $('name_card_bcash').observe('blur', function (e) {
+            var id = document.getElementById("name_card_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=name'
+            });
+        });
+
+        $('month_bcash').observe('blur', function (e) {
+            var id = document.getElementById("month_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=mes'
+            });
+        });
+
+        $('year_bcash').observe('blur', function (e) {
+            var id = document.getElementById("year_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=ano'
+            });
+        });
+
+        $('installments_bcash').observe('blur', function (e) {
+            var id = document.getElementById("installments_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=parcelas'
+            });
+            forceReloadOrderReviewOsc();
+        });
+
+        $('cvv_bcash').observe('blur', function (e) {
+            var id = document.getElementById("cvv_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=cvv'
+            });
+        });
+        <?php if($this->getPhone()) : ?>
+        $('ddd_bcash').observe('blur', function (e) {
+            var id = document.getElementById("ddd_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=ddd'
+            });
+        });
+
+        $('phone_bcash').observe('blur', function (e) {
+            var id = document.getElementById("phone_bcash").value;
+            new Ajax.Request(requestUrl, {
+                method: 'POST',
+                parameters: 'pid=' + id + '&input=telefone'
+            });
+        });
+        <?php endif; ?>
+
+        function validateCardNumber()
+        {
+            var RegExpHipercard = /^(3841\d{10}(\d{3})?)|(3841\d{15})$/;
+            var RegExpElo = /^((((636368)|(438935)|(504175)|(451416)|(636297))\d{0,10})|((5067)|(4576)|(4011))\d{0,12})$/;
+            var RegExpElo2 = /^(636368|438935|504175|451416|636297)([0-9]{10})$/;
+            var RegExpDiners = /^3[0,6,8]\d{12}$/;
+            var RegExpAmex = /^3[47][0-9]{13}$/;
+            var RegExpVisa = /^4[0-9]{12}([0-9]{3})?$/;
+            var RegExpMaster = /^5[1-5][0-9]{14}$/;
+            var RegExpAura = /^(5078\d{2})(\d{2})(\d{11})$/;
+            var RegexFinal = '';
+            var paymentRadio = getCardSelected();
+            if (paymentRadio.isCard) {
+                var cardNumber = document.getElementById("card_number_bcash").value;
+                cardNumber = cardNumber.trim();
+                if(cardNumber.length <= 0) { return false; }
+                var codeCard = paymentRadio.element.value;
+                switch (parseInt(codeCard)) {
+                    case visa:
+                        RegexFinal = RegExpVisa;
+                        break;
+                    case master:
+                        RegexFinal = RegExpMaster;
+                        break;
+                    case american_express:
+                        RegexFinal = RegExpAmex;
+                        break;
+                    case elo:
+                        if(cardNumber.length <= 16) { return true; }
+                        RegexFinal = RegExpElo;
+                        break;
+                    case hipercard:
+                        if(cardNumber.length >= 16 && cardNumber.length <= 19) { return true; }
+                        RegexFinal = RegExpHipercard;
+                        break;
+                    case dinners:
+                        if(cardNumber.length >= 14 && cardNumber.length <= 16) { return true; }
+                        RegexFinal = RegExpDiners;
+                        break;
+                    case aura:
+                        if(cardNumber.length == 19) { return true; }
+                        RegexFinal = RegExpAura;
+                        break;
+                }
+                if (RegexFinal == '') {
+                    alert('Número do cartão não corresponde a bandeira selecionada ou está incorreto.');
+                    cardNumber.value = '';
+                    return false;
+                }
+                if (RegexFinal.test(cardNumber) == false) {
+                    alert('Número do cartão não corresponde a bandeira selecionada ou está incorreto.');
+                    cardNumber.value = '';
+                    return false;
+                }
+                return true;
+            }
+        }
+    };
+    initBcashPagamento();
+    //]]>
+</script>

@@ -1,0 +1,17 @@
+<?php
+$_order = $this->getOrder();
+
+$quoteId = $_order->getQuoteId();
+
+$quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($quoteId);
+
+$payment_link = $quote->getPaymentLinkBcash();
+?>
+
+<?php if( strpos($payment_link, 'Boleto') !== FALSE ): ?>
+    <span class="separator">|</span>
+    <a href="<?php echo $payment_link ?>" class="link-reorder"><?php echo $this->__('2.a Via Boleto') ?></a>
+<?php elseif( $payment_link && strpos($payment_link, 'Boleto') === FALSE ) : ?>
+    <span class="separator">|</span>
+    <a href="<?php echo $payment_link ?>" class="link-reorder"><?php echo $this->__('Pagar via TEF') ?></a>
+<?php endif ?>

@@ -1,0 +1,24 @@
+<!-- <h1>Bcash</h1> -->
+<link rel="stylesheet" href="<?php echo $this->getSkinUrl('bcash/pagamento/css/application.css') ?>" type="text/css"/>
+<div id="bcash_pagamento" style="float:left; width: 100%; padding: 10px;">
+<?php
+//$this->escapeHtml($this->getOrder()->getViewOrderUrl())
+$url = Mage::getUrl() . 'sales/order/view/order_id/' . $this->getOrder()->getId();
+$idPedido = $this->getQuote()->getReservedOrderId();
+$type = $this->getType();
+if ($type && $type->type == Bcash_Pagamento_Helper_PaymentMethod::CARD_TYPE): ?>
+<!-- Compra realizada via Cartão de Crédito -->
+<?php elseif ($type &&$type->type == Bcash_Pagamento_Helper_PaymentMethod::ONLINE_TRANSFER_TYPE): ?>
+    <!-- Compra realizada via Transferência -->
+    Clique no icone ao lado para acessar seu banco para realizar a transferência
+    <a href="<?php echo $this->getQuote()->getPaymentLinkBcash() ?>" >
+        <label class="bandeira band-<?php echo $type->id ?>" for="payment-method-<?php echo $type->id ?>"></label>
+    </a>
+<?php elseif ($type && $type->type == Bcash_Pagamento_Helper_PaymentMethod::BANKSLIP_TYPE): ?>
+    <!-- Compra realizada via Boleto -->
+    Clique no icone ao lado para gerar o boleto para pagamento
+    <a href="<?php echo $this->getQuote()->getPaymentLinkBcash() ?>" >
+        <label class="bandeira band-<?php echo $type->id ?>" for="payment-method-<?php echo $type->id ?>"></label>
+    </a>
+<?php endif; ?>
+</div>

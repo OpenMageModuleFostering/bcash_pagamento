@@ -1,0 +1,648 @@
+.payment-group *,
+.payment-group *:before,
+.payment-group *:after {
+  box-sizing: border-box;
+}
+
+.payment-group {
+  font: 14px Arial, Helvetica, sans-serif;
+}
+
+.payment-group ul {
+  list-style: none;
+  padding-left: 0px;
+  margin-left: -5px;
+}
+
+.payment-group li {
+  display: inline-block;
+  height: 42px;
+  padding: 10px 5px;
+}
+
+.payment-group input[type='radio'] {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -1 !important;
+  float: left !important;
+  clear: both !important;
+  margin: 0px !important;
+  padding: 0px !important;
+  width: 0px !important;
+  height: 0px !important;
+  opacity: 0;
+}
+
+.bandeira {
+  display: inline-block;
+  background: url(../images/application-sprite.png) no-repeat;
+  width: 70px;
+  height: 46px;
+  text-indent: -9999px;
+  cursor: pointer;
+}
+
+
+/* visa */
+
+.band-1 {
+  background-position: 0 -177px
+}
+
+.band-1:hover {
+  border: none;
+  background-position: -74px -177px
+}
+
+.payment-group input[type='radio']:checked + .band-1 {
+  background-position: -150px -177px;
+}
+
+
+/* master */
+
+.band-2 {
+  background-position: 0 -226px
+}
+
+.band-2:hover {
+  border: none;
+  background-position: -74px -226px
+}
+
+.payment-group input[type='radio']:checked + .band-2 {
+  background-position: -150px -226px;
+}
+
+
+/* amex */
+
+.band-37 {
+  background-position: 0 -274px
+}
+
+.band-37:hover {
+  border: none;
+  background-position: -74px -274px
+}
+
+.payment-group input[type='radio']:checked + .band-37 {
+  background-position: -150px -274px
+}
+
+
+/* aura */
+
+.band-45 {
+  background-position: 0 -323px
+}
+
+.band-45:hover {
+  border: none;
+  background-position: -74px -323px
+}
+
+.payment-group input[type='radio']:checked + .band-45 {
+  background-position: -150px -323px
+}
+
+
+/* diners */
+
+.band-55 {
+  background-position: 0 -371px
+}
+
+.band-55:hover {
+  border: none;
+  background-position: -74px -371px
+}
+
+.payment-group input[type='radio']:checked + .band-55 {
+  background-position: -150px -371px
+}
+
+
+/* hiper */
+
+.band-56 {
+  background-position: 0 -420px
+}
+
+.band-56:hover {
+  border: none;
+  background-position: -74px -420px
+}
+
+.payment-group input[type='radio']:checked + .band-56 {
+  background-position: -150px -420px
+}
+
+
+/* elo */
+
+.band-63 {
+  background-position: 0 -468px
+}
+
+.band-63:hover {
+  border: none;
+  background-position: -74px -468px
+}
+
+.payment-group input[type='radio']:checked + .band-63 {
+  background-position: -150px -468px
+}
+
+
+/* boleto */
+
+.band-10 {
+  background-position: 0 -517px
+}
+
+.band-10:hover {
+  border: none;
+  background-position: -74px -517px
+}
+
+.payment-group input[type='radio']:checked + .band-10 {
+  background-position: -150px -517px
+}
+
+
+/* bb */
+
+.band-58 {
+  background-position: 0 -565px
+}
+
+.band-58:hover {
+  border: none;
+  background-position: -74px -565px
+}
+
+.payment-group input[type='radio']:checked + .band-58 {
+  background-position: -150px -565px
+}
+
+
+/* bradesco */
+
+.band-59 {
+  background-position: 0 -614px
+}
+
+.band-59:hover {
+  border: none;
+  background-position: -74px -614px
+}
+
+.payment-group input[type='radio']:checked + .band-59 {
+  background-position: -150px -614px
+}
+
+
+/* itau */
+
+.band-60 {
+  background-position: 0 -662px
+}
+
+.band-60:hover {
+  border: none;
+  background-position: -74px -662px
+}
+
+.payment-group input[type='radio']:checked + .band-60 {
+  background-position: -150px -662px
+}
+
+
+/* hsbc */
+
+.band-62 {
+  background-position: 0 -759px
+}
+
+.band-62:hover {
+  border: none;
+  background-position: -74px -759px
+}
+
+.payment-group input[type='radio']:checked + .band-62 {
+  background-position: -150px -759px
+}
+
+
+/* banrisul*/
+
+.band-61 {
+  background-position: 0 -711px
+}
+
+.band-61:hover {
+  border: none;
+  background-position: -74px -711px
+}
+
+.payment-group input[type='radio']:checked + .band-61 {
+  background-position: -150px -711px
+}
+
+
+/* bootstrap */
+
+.b-col-xs-1,
+.b-col-xs-2,
+.b-col-xs-3,
+.b-col-xs-4,
+.b-col-xs-5,
+.b-col-xs-6,
+.b-col-xs-7,
+.b-col-xs-8,
+.b-col-xs-9,
+.b-col-xs-10,
+.b-col-xs-11,
+.b-col-xs-12 {
+  float: left;
+}
+
+.b-col-xs-1,
+.b-col-sm-1,
+.b-col-md-1,
+.b-col-lg-1,
+.b-col-xs-2,
+.b-col-sm-2,
+.b-col-md-2,
+.b-col-lg-2,
+.b-col-xs-3,
+.b-col-sm-3,
+.b-col-md-3,
+.b-col-lg-3,
+.b-col-xs-4,
+.b-col-sm-4,
+.b-col-md-4,
+.b-col-lg-4,
+.b-col-xs-5,
+.b-col-sm-5,
+.b-col-md-5,
+.b-col-lg-5,
+.b-col-xs-6,
+.b-col-sm-6,
+.b-col-md-6,
+.b-col-lg-6,
+.b-col-xs-7,
+.b-col-sm-7,
+.b-col-md-7,
+.b-col-lg-7,
+.b-col-xs-8,
+.b-col-sm-8,
+.b-col-md-8,
+.b-col-lg-8,
+.b-col-xs-9,
+.b-col-sm-9,
+.b-col-md-9,
+.b-col-lg-9,
+.b-col-xs-10,
+.b-col-sm-10,
+.b-col-md-10,
+.b-col-lg-10,
+.b-col-xs-11,
+.b-col-sm-11,
+.b-col-md-11,
+.b-col-lg-11,
+.b-col-xs-12,
+.b-col-sm-12,
+.b-col-md-12,
+.b-col-lg-12 {
+  position: relative;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.b-col-xs-10 {
+  width: 83.33333333%;
+}
+
+.b-col-xs-8 {
+  width: 66.66666667%;
+}
+
+.b-col-xs-7 {
+  width: 58.33333333%;
+}
+
+.b-col-xs-6 {
+  width: 50%;
+}
+
+.b-col-xs-5 {
+  width: 41.66666667%;
+}
+
+.b-col-xs-4 {
+  width: 33.33333333%;
+}
+
+.b-col-xs-3 {
+  width: 25%;
+}
+
+.b-col-xs-2 {
+  width: 16.66666667%;
+}
+
+.b-col-xs-1 {
+  width: 8.33333333%;
+}
+
+.b-input-sm {
+  height: 30px;
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+
+.b-form-control {
+  display: block;
+  width: 100%;
+  /*height: 24px;*/
+  /*padding: 6px 12px;*/
+  /*font-size: 14px;*/
+  /*line-height: 1.42857;*/
+  /*color: #555;*/
+  /*background-color: #FFF;*/
+  /*background-image: none;*/
+  /*border: 1px solid #CCC;*/
+  /*border-radius: 4px;*/
+  /*box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset;*/
+  /*transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;*/
+}
+
+.b-form-control .error {
+  border-color: red;
+}
+
+.b-form-control:focus {
+  border: 1px solid #39C;
+}
+
+.b-form-control::-moz-placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.b-form-control:-ms-input-placeholder {
+  color: #999;
+}
+
+.b-form-control::-webkit-input-placeholder {
+  color: #999;
+}
+
+.b-form-control[disabled],
+.b-form-control[readonly],
+fieldset[disabled] .b-form-control {
+  background-color: #eee;
+  opacity: 1;
+}
+
+.b-form-control[disabled],
+fieldset[disabled] .b-form-control {
+  cursor: not-allowed;
+}
+
+select.b-form-control {
+  border-radius: 2px;
+  border: 1px solid silver;
+  background: #FFFFFF;
+  font-size: 15px;
+  width: 100%;
+  padding: 0 8px;
+  height: 30px;
+  margin-top: 0px;
+}
+
+.b-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.b-btn-success {
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+
+.b-btn-success.focus,
+.b-btn-success:focus {
+  color: #fff;
+  background-color: #449d44;
+  border-color: #255625;
+}
+
+.b-btn-success:hover {
+  color: #fff;
+  background-color: #449d44;
+  border-color: #398439;
+}
+
+.b-field-card-date {
+  width: 21.5px;
+  display: inline-block;
+}
+
+.b-form-inline .b-form-group {
+  display: inline-block;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+.b-form-group:before,
+.b-row:after,
+.b-row:before {
+  display: table;
+  content: " ";
+}
+
+.b-row:after,
+.b-form-group:after {
+  clear: both;
+}
+
+.b-row {
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.b-no-margin {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.b-l-margin {
+  margin-left: 15px;
+}
+
+.b-r-margin {
+  margin-right: 15px;
+}
+
+.b-form-group {
+  margin-bottom: 15px;
+}
+
+.b-form-inline .b-form-group {
+  display: inline-block;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+label {
+  display: inline-block;
+  max-width: 100%;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.b-form-group select.b-form-control {
+  height: 30px;
+  line-height: 30px;
+}
+
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+.b-hide {
+  display: none;
+}
+
+.b-n-row {
+  float: left;
+  width: 95%;
+  padding: 2px;
+}
+
+
+/**
+ * Tooltip Styles
+ */
+
+.icon-tooltip {
+  display: inline-block;
+  margin-left: 3px;
+  padding: 1px 4px;
+  vertical-align: middle;
+  color: #fff;
+  font-size: 8px;
+  background-color: #2E8AB8;
+  border-radius: 40px;
+}
+
+
+/* Add this attribute to the element that needs a tooltip */
+
+[data-tooltip] {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+
+
+/* Hide the tooltip content by default */
+
+[data-tooltip]:before,
+[data-tooltip]:after {
+  visibility: hidden;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+  filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* Position tooltip above the element */
+
+[data-tooltip]:before {
+  position: absolute;
+  bottom: 150%;
+  left: 50%;
+  margin-bottom: 5px;
+  margin-left: -80px;
+  padding: 7px;
+  width: 160px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #000;
+  background-color: rgba(45, 133, 198, 1);
+  color: #fff;
+  content: attr(data-tooltip);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+
+/* Triangle hack to make tooltip look like a speech bubble */
+
+[data-tooltip]:after {
+  position: absolute;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  border-top: 5px solid #000;
+  border-top: 5px solid rgba(45, 133, 198, 1);
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: " ";
+  font-size: 0;
+  line-height: 0;
+}
+
+
+/* Show tooltip content on hover */
+
+[data-tooltip]:hover:before,
+[data-tooltip]:hover:after {
+  visibility: visible;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+  filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
+  opacity: 1;
+}

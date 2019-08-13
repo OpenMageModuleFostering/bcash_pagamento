@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout>
+    <checkout_onepage_paymentmethod>
+        <reference name="head">
+            <action method="addJs">
+                <script>bcash/pagamento/js/payment.js</script>
+            </action>
+        </reference>
+    </checkout_onepage_paymentmethod>
+    <sales_order_view>
+        <reference name="sales.order.info.buttons">
+            <block type="sales/order_info_buttons" name="customer.order.payment.button" as="customer_order_payment_button" template="pagamento/sales/order/info/buttons/payment.phtml"></block>
+        </reference>
+        <reference name="sales.order.info">
+            <block type="sales/order_info" name="customer.order.payment" as="customer_order_payment" template="pagamento/sales/order/info/info.phtml"></block>
+        </reference>
+    </sales_order_view>
+</layout>
