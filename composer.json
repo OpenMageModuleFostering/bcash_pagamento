@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Bcash_Pagamento",
+    "name": "OpenMageModuleFostering\/Bcash_Pagamento",
     "type": "magento-module",
     "license": "GNU-General-Public-License-(GPL)",
     "homepage": "",
     "description": "Bcash Magento Transparente (API)",
     "authors": [
-    {
-        "name": "Bcash",
-        "email": "danilo.benedetti@bcash.com.br"
-    }
-],
+        {
+            "name": "Bcash",
+            "email": "danilo.benedetti@bcash.com.br"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
